@@ -421,7 +421,7 @@ function renderApp(){
   <div class="shell" id="mainApp">
     <div class="topbar">
       <div class="topbar-logo">
-        <svg class="topbar-logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg>
+        <div id="topbarLogoMark"></div>
         <div>
           <div class="topbar-logo-text" id="topbarTitle">SplitTrip</div>
           <div class="topbar-logo-sub" id="topbarTrip"></div>
@@ -448,6 +448,11 @@ function renderApp(){
       <button class="bnav-btn" id="nb-members" onclick="navTo('members')" aria-label="Members"><i class="ti ti-users"></i>Members</button>
     </div>
   </div>`;
+  // Inject logo SVG (can't be in template literal due to SVG path syntax)
+  const logoEl=document.getElementById('topbarLogoMark');
+  if(logoEl){
+    logoEl.innerHTML='<svg class="topbar-logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg>';
+  }
   // Handle post-registration trip creation
   checkPostRegSetup();
   refreshTopbar();
@@ -780,8 +785,10 @@ function renderMembers(){
   const pg=document.getElementById('page-members');if(!pg)return;
   const tots=getTotals();
   const uid=STATE.profile?.id;
-  const rows=STATE.members.map(u=>`
-    <div class="member-row">${avHTML(u)}<div class="member-info"><div class="member-name">${u.first} ${u.last}${u.id===uid?' <span style="font-size:11px;color:var(--text2);font-weight:400;">(you)</span>':''}</div><div class="member-email">${u.email}</div></div><div style="font-size:13px;color:var(--text2);flex-shrink:0;">${fmt(tots[u.id]||0)}</div></div>`).join('');
+  const rows=STATE.members.map(u=>{
+    const youTag=u.id===uid?' <span style="font-size:11px;color:var(--text2);font-weight:400;">(you)</span>':'';
+    return'<div class="member-row">'+avHTML(u)+'<div class="member-info"><div class="member-name">'+u.first+' '+u.last+youTag+'</div><div class="member-email">'+u.email+'</div></div><div style="font-size:13px;color:var(--text2);flex-shrink:0;">'+fmt(tots[u.id]||0)+'</div></div>';
+  }).join('');
   pg.innerHTML=`
     <div class="section">
       ${rows}
@@ -940,17 +947,16 @@ async function loadMyTrips(){
   el.innerHTML=memberships.map(m=>{
     const t=m.trips;if(!t)return'';
     const isActive=STATE.trip&&STATE.trip.id===t.id;
-    return`<div class="trip-card">
-      <div class="trip-card-head" onclick="manageTrip('${t.id}','${t.name.replace(/'/g,"\'")}')">
-        <div>
-          <div class="trip-card-name">${t.name}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          ${isActive?'<span class="trip-active-badge">Active</span>':'<button class="btn-sm" onclick="event.stopPropagation();switchTrip(''+t.id+'')">Switch</button>'}
-          <i class="ti ti-chevron-right" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>
-        </div>
-      </div>
-    </div>`;
+    const activeBadge=isActive?'<span class="trip-active-badge">Active</span>':'<button class="btn-sm" onclick="event.stopPropagation();switchTrip(\''+t.id+'\')" >Switch</button>';
+    return'<div class="trip-card">'+
+      '<div class="trip-card-head" data-tid="'+t.id+'" data-tname="'+t.name+'" onclick="manageTrip(this.dataset.tid,this.dataset.tname)">'+
+        '<div><div class="trip-card-name">'+t.name+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;">'+
+          activeBadge+
+          '<i class="ti ti-chevron-right" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 
@@ -992,10 +998,11 @@ async function manageTrip(tripId,tripName){
       const p=m.profiles;if(!p)return'';
       const c=colorFor(p.id);
       const av=p.avatar_url?`<img src="${p.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`:'';
-      return`<div class="member-row">
-        <div class="av" style="${p.avatar_url?'overflow:hidden;':`background:${c.bg};color:${c.fg};`}">${p.avatar_url?av:initials(p)}</div>
-        <div class="member-info"><div class="member-name">${p.first} ${p.last}</div><div class="member-email">${p.email}</div></div>
-      </div>`;
+      const avStyle2=p.avatar_url?'overflow:hidden;':'background:'+c.bg+';color:'+c.fg+';';
+      return'<div class="member-row">'+
+        '<div class="av" style="'+avStyle2+'">'+(p.avatar_url?av:initials(p))+'</div>'+
+        '<div class="member-info"><div class="member-name">'+p.first+' '+p.last+'</div><div class="member-email">'+p.email+'</div></div>'+
+      '</div>';
     }).join('');
   }
   // Pre-load all profiles for search
@@ -1025,14 +1032,15 @@ function searchMembers(query){
   res.innerHTML='<div class="search-results">'+matches.map(p=>{
     const c=colorFor(p.id);
     const av=p.avatar_url?`<img src="${p.avatar_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />`:'';
-    return`<div class="search-result-row" onclick="addMemberFromSearch('${p.id}')">
-      <div class="av av-sm" style="${p.avatar_url?'overflow:hidden;':`background:${c.bg};color:${c.fg};`}">${p.avatar_url?av:initials(p)}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;">${p.first} ${p.last}</div>
-        <div style="font-size:12px;color:var(--text2);">${p.email}</div>
-      </div>
-      <i class="ti ti-user-plus" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>
-    </div>`;
+    const avStyle3=p.avatar_url?'overflow:hidden;':'background:'+c.bg+';color:'+c.fg+';';
+    return'<div class="search-result-row" onclick="addMemberFromSearch(''+p.id+'')">'+
+      '<div class="av av-sm" style="'+avStyle3+'">'+(p.avatar_url?av:initials(p))+'</div>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:14px;font-weight:600;">'+p.first+' '+p.last+'</div>'+
+        '<div style="font-size:12px;color:var(--text2);">'+p.email+'</div>'+
+      '</div>'+
+      '<i class="ti ti-user-plus" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>'+
+    '</div>';
   }).join('')+'</div>';
 }
 
