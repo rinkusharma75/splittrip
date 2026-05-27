@@ -227,32 +227,20 @@ function setLoading(btnId,loading){
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init(){
-  // Handle magic link tokens in URL hash
-  if(window.location.hash&&window.location.hash.includes('access_token')){
-    const {data:{session},error}=await sb.auth.getSession();
-    if(session){
-      STATE.session=session;
-      window.history.replaceState({},'',window.location.pathname);
-      await loadUserData();
-      renderApp();
-      return;
-    }
-  }
-  const {data:{session}} = await sb.auth.getSession();
-  if(session){
-    STATE.session = session;
-    await loadUserData();
-    renderApp();
-  } else {
-    renderAuth();
-  }
+  // Fallback: if stuck loading for 6s, show auth screen
+  const loadingTimeout=setTimeout(()=>{
+    const ls=document.getElementById('loadingScreen');
+    if(ls){renderAuth();}
+  },6000);
+
+  // onAuthStateChange fires immediately with existing session OR after magic link
   sb.auth.onAuthStateChange(async(event,session)=>{
-    if((event==='SIGNED_IN'||event==='TOKEN_REFRESHED')&&session){
+    clearTimeout(loadingTimeout);
+    if((event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')&&session){
       STATE.session=session;
       await loadUserData();
       renderApp();
-    }
-    if(event==='SIGNED_OUT'){
+    } else if(event==='SIGNED_OUT'||event==='INITIAL_SESSION'&&!session){
       STATE={session:null,profile:null,trip:null,members:[],expenses:[],profiles:{}};
       renderAuth();
     }
