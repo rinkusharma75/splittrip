@@ -423,10 +423,9 @@ async function registerUser(){
   if(!first||!last||!email){showErr('registerErr','Please fill in all fields.');return;}
   setLoading('registerBtn',true);
   hideErr('registerErr');
-  const redirectTo=window.location.origin+'?first='+encodeURIComponent(first)+'&last='+encodeURIComponent(last);
   const {error}=await sb.auth.signInWithOtp({
     email,
-    options:{shouldCreateUser:true,emailRedirectTo:redirectTo,data:{first,last}}
+    options:{shouldCreateUser:true,data:{first,last}}
   });
   setLoading('registerBtn',false);
   if(error){showErr('registerErr',error.message+' | '+(error.status||'')+' | '+(error.code||''));return;}
@@ -482,26 +481,25 @@ function renderApp(){
 async function checkPostRegSetup(){
   if(!STATE.session)return;
   const uid=STATE.session.user.id;
-  const params=new URLSearchParams(window.location.search);
-  const first=params.get('first');
-  const last=params.get('last');
-  const inviteTripId=params.get('trip');
-  const inviteTripName=params.get('tripname');
-  // Update profile name if passed via URL
-  if(first&&last){
+  const meta=STATE.session.user.user_metadata||{};
+  const first=meta.first;
+  const last=meta.last;
+  const invitedTrip=meta.invited_trip;
+  // Update profile name from metadata
+  if(first&&last&&STATE.profile&&(!STATE.profile.first||STATE.profile.first===STATE.session.user.email.split('@')[0])){
     await sb.from('profiles').update({first,last}).eq('id',uid);
-    if(STATE.profile){STATE.profile.first=first;STATE.profile.last=last;}
+    STATE.profile.first=first;
+    STATE.profile.last=last;
   }
-  // If joining via invite link, add to that trip
-  if(inviteTripId&&!STATE.trip){
-    const {data:existing}=await sb.from('trip_members').select('*').eq('trip_id',inviteTripId).eq('user_id',uid).single();
+  // If joining via invite, add to that trip
+  if(invitedTrip&&!STATE.trip){
+    const {data:existing}=await sb.from('trip_members').select('*').eq('trip_id',invitedTrip).eq('user_id',uid).single();
     if(!existing){
-      await sb.from('trip_members').insert({trip_id:inviteTripId,user_id:uid});
+      await sb.from('trip_members').insert({trip_id:invitedTrip,user_id:uid});
     }
-    const {data:trip}=await sb.from('trips').select('*').eq('id',inviteTripId).single();
+    const {data:trip}=await sb.from('trips').select('*').eq('id',invitedTrip).single();
     if(trip){STATE.trip=trip;await loadTripData();}
   }
-  window.history.replaceState({},'',window.location.pathname);
   refreshTopbar();
   if(!STATE.trip){
     showTripSetup();
@@ -852,10 +850,9 @@ async function inviteMember(){
       invited_by:STATE.profile.id
     });
     // Send signup OTP — when they register they'll be linked to this trip
-    const redirectTo=window.location.origin+'?trip='+encodeURIComponent(STATE.trip.id)+'&tripname='+encodeURIComponent(STATE.trip.name);
     const {error}=await sb.auth.signInWithOtp({
       email,
-      options:{shouldCreateUser:true,emailRedirectTo:redirectTo}
+      options:{shouldCreateUser:true,data:{invited_trip:STATE.trip.id}}
     });
     if(inviteBtn)inviteBtn.disabled=false;
     if(error){msg.textContent='Failed to send invite: '+error.message;msg.style.color='var(--red)';msg.classList.add('show');return;}
@@ -1139,9 +1136,7 @@ async function panelInviteMember(){
     if(STATE.trip&&STATE.trip.id===ACTIVE_MANAGE_TRIP)await loadTripData();
     manageTrip(ACTIVE_MANAGE_TRIP,document.getElementById('manageTripName').textContent);
   } else {
-    const tripName=document.getElementById('manageTripName').textContent;
-    const redirectTo=window.location.origin+'?trip='+encodeURIComponent(ACTIVE_MANAGE_TRIP)+'&tripname='+encodeURIComponent(tripName);
-    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirectTo}});
+    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,data:{invited_trip:ACTIVE_MANAGE_TRIP}}});
     if(error){msg.textContent='Error: '+error.message;msg.style.color='var(--red)';msg.classList.add('show');return;}
     document.getElementById('panelInviteEmail').value='';
     msg.textContent='Invite sent to '+email;msg.style.color='var(--green)';msg.classList.add('show');
