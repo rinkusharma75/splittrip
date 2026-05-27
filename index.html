@@ -227,6 +227,17 @@ function setLoading(btnId,loading){
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init(){
+  // Handle magic link tokens in URL hash
+  if(window.location.hash&&window.location.hash.includes('access_token')){
+    const {data:{session},error}=await sb.auth.getSession();
+    if(session){
+      STATE.session=session;
+      window.history.replaceState({},'',window.location.pathname);
+      await loadUserData();
+      renderApp();
+      return;
+    }
+  }
   const {data:{session}} = await sb.auth.getSession();
   if(session){
     STATE.session = session;
@@ -236,7 +247,7 @@ async function init(){
     renderAuth();
   }
   sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_IN'&&session){
+    if((event==='SIGNED_IN'||event==='TOKEN_REFRESHED')&&session){
       STATE.session=session;
       await loadUserData();
       renderApp();
