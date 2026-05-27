@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1a1a1a">
 <title>SplitTrip — Travel. Split. Settle.</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:16px;}
@@ -185,7 +185,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <script>
 const SUPABASE_URL = 'https://lwbnebgqfhavsrboxpak.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3Ym5lYmdxZmhhdnNyYm94cGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTA3MzMsImV4cCI6MjA5NTQ2NjczM30.NGqeDNXd9gLBxEoUksmDN_FPqAs45YL5O4gyvA7_J2Y';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = (window.supabase||window.Supabase).createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const COLORS=[{bg:'#E6F1FB',fg:'#0C447C'},{bg:'#E1F5EE',fg:'#085041'},{bg:'#FAEEDA',fg:'#633806'},{bg:'#FBEAF0',fg:'#72243E'},{bg:'#EEEDFE',fg:'#3C3489'},{bg:'#FAECE7',fg:'#993C1D'}];
 const CAT_COLORS={Food:{bg:'#E1F5EE',fg:'#085041'},Transport:{bg:'#E6F1FB',fg:'#0C447C'},Accommodation:{bg:'#EEEDFE',fg:'#3C3489'},Activities:{bg:'#FAEEDA',fg:'#633806'},Other:{bg:'#F1EFE8',fg:'#444441'}};
@@ -227,20 +227,28 @@ function setLoading(btnId,loading){
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init(){
-  // Fallback: if stuck loading for 6s, show auth screen
-  const loadingTimeout=setTimeout(()=>{
-    const ls=document.getElementById('loadingScreen');
-    if(ls){renderAuth();}
-  },6000);
-
-  // onAuthStateChange fires immediately with existing session OR after magic link
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    clearTimeout(loadingTimeout);
-    if((event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')&&session){
+  try {
+    // Try to get session directly first
+    const {data:{session},error} = await sb.auth.getSession();
+    if(session){
       STATE.session=session;
       await loadUserData();
       renderApp();
-    } else if(event==='SIGNED_OUT'||event==='INITIAL_SESSION'&&!session){
+    } else {
+      renderAuth();
+    }
+  } catch(e){
+    renderAuth();
+  }
+
+  // Also listen for changes (handles magic link redirect)
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session&&!STATE.session){
+      STATE.session=session;
+      await loadUserData();
+      renderApp();
+    }
+    if(event==='SIGNED_OUT'){
       STATE={session:null,profile:null,trip:null,members:[],expenses:[],profiles:{}};
       renderAuth();
     }
