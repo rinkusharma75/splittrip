@@ -923,8 +923,15 @@ function renderProfile(){
     <div class="hidden" id="manageTripPanel">
       <div class="section" style="margin-top:10px;">
         <div class="manage-panel-header">
-          <div class="manage-panel-name" id="manageTripName"></div>
-          <button class="btn-sm" onclick="hideTripPanel()">Done</button>
+          <div style="flex:1;min-width:0;">
+            <div class="manage-panel-name" id="manageTripName" onclick="startRenameTrip()" title="Tap to rename"></div>
+            <div class="hidden" id="renameTripWrap" style="display:flex;gap:6px;align-items:center;">
+              <input class="form-input" type="text" id="renameTripInput" style="flex:1;padding:8px 12px;font-size:15px;" />
+              <button class="btn-sm-primary" onclick="saveRenameTrip()" style="padding:8px 12px;">Save</button>
+              <button class="btn-sm" onclick="cancelRenameTrip()" style="padding:8px 12px;">✕</button>
+            </div>
+          </div>
+          <button class="btn-sm" onclick="hideTripPanel()" style="flex-shrink:0;">Done</button>
         </div>
         <div class="tab-row" style="margin-top:12px;">
           <div class="tab-item active" onclick="switchTripTab('members',this)">Members</div>
@@ -1031,6 +1038,40 @@ async function manageTrip(tripId,tripName){
 }
 
 function hideTripPanel(){hide('manageTripPanel');ACTIVE_MANAGE_TRIP=null;}
+
+function startRenameTrip(){
+  const nameEl=document.getElementById('manageTripName');
+  const wrapEl=document.getElementById('renameTripWrap');
+  const input=document.getElementById('renameTripInput');
+  if(!nameEl||!wrapEl||!input)return;
+  input.value=nameEl.textContent;
+  nameEl.classList.add('hidden');
+  wrapEl.classList.remove('hidden');
+  input.focus();
+  input.select();
+}
+
+function cancelRenameTrip(){
+  document.getElementById('manageTripName').classList.remove('hidden');
+  document.getElementById('renameTripWrap').classList.add('hidden');
+}
+
+async function saveRenameTrip(){
+  const input=document.getElementById('renameTripInput');
+  const nameEl=document.getElementById('manageTripName');
+  const newName=input?input.value.trim():'';
+  if(!newName||!ACTIVE_MANAGE_TRIP)return;
+  const {error}=await sb.from('trips').update({name:newName}).eq('id',ACTIVE_MANAGE_TRIP);
+  if(error){alert('Failed to rename: '+error.message);return;}
+  nameEl.textContent=newName;
+  cancelRenameTrip();
+  // Update STATE if this is the active trip
+  if(STATE.trip&&STATE.trip.id===ACTIVE_MANAGE_TRIP){
+    STATE.trip.name=newName;
+    refreshTopbar();
+  }
+  loadMyTrips();
+}
 
 function switchTripTab(tab,el){
   document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
