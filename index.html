@@ -444,14 +444,24 @@ async function checkPostRegSetup(){
   const params=new URLSearchParams(window.location.search);
   const first=params.get('first');
   const last=params.get('last');
+  const inviteTripId=params.get('trip');
+  const inviteTripName=params.get('tripname');
   // Update profile name if passed via URL
   if(first&&last){
     await sb.from('profiles').update({first,last}).eq('id',uid);
     if(STATE.profile){STATE.profile.first=first;STATE.profile.last=last;}
-    window.history.replaceState({},'',window.location.pathname);
   }
+  // If joining via invite link, add to that trip
+  if(inviteTripId&&!STATE.trip){
+    const {data:existing}=await sb.from('trip_members').select('*').eq('trip_id',inviteTripId).eq('user_id',uid).single();
+    if(!existing){
+      await sb.from('trip_members').insert({trip_id:inviteTripId,user_id:uid});
+    }
+    const {data:trip}=await sb.from('trips').select('*').eq('id',inviteTripId).single();
+    if(trip){STATE.trip=trip;await loadTripData();}
+  }
+  window.history.replaceState({},'',window.location.pathname);
   refreshTopbar();
-  // If no trip yet, show create/join trip screen
   if(!STATE.trip){
     showTripSetup();
   } else {
@@ -772,16 +782,45 @@ async function inviteMember(){
   const email=document.getElementById('inviteEmail').value.trim();
   const msg=document.getElementById('inviteMsg');
   if(!email||!email.includes('@')){msg.textContent='Enter a valid email.';msg.style.color='var(--red)';msg.classList.add('show');return;}
-  // Check if user exists
+  if(STATE.members.find(m=>m.email===email)){msg.textContent='Already a member of this trip.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+  const inviteBtn=document.querySelector('.invite-btn');
+  if(inviteBtn)inviteBtn.disabled=true;
+  // Check if user already has an account
   const {data:existing}=await sb.from('profiles').select('*').eq('email',email).single();
-  if(!existing){msg.textContent='No SplitTrip account found for that email. Ask them to register first.';msg.style.color='var(--red)';msg.classList.add('show');return;}
-  if(STATE.members.find(m=>m.id===existing.id)){msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');return;}
-  await sb.from('trip_members').insert({trip_id:STATE.trip.id,user_id:existing.id});
-  STATE.members.push(existing);
-  STATE.profiles[existing.id]=existing;
-  document.getElementById('inviteEmail').value='';
-  msg.textContent='Member added to trip!';msg.style.color='var(--green)';msg.classList.add('show');
-  renderMembers();
+  if(existing){
+    // Already registered — just add to trip
+    if(STATE.members.find(m=>m.id===existing.id)){
+      msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');
+      if(inviteBtn)inviteBtn.disabled=false;return;
+    }
+    await sb.from('trip_members').insert({trip_id:STATE.trip.id,user_id:existing.id});
+    STATE.members.push(existing);
+    STATE.profiles[existing.id]=existing;
+    document.getElementById('inviteEmail').value='';
+    msg.textContent=existing.first+' added to '+STATE.trip.name+'!';
+    msg.style.color='var(--green)';msg.classList.add('show');
+    renderMembers();
+  } else {
+    // Not registered — store pending invite and send OTP signup email
+    // Save pending invite in trip_invites table
+    const {error:invErr}=await sb.from('trip_invites').upsert({
+      trip_id:STATE.trip.id,
+      email:email,
+      invited_by:STATE.profile.id
+    });
+    // Send signup OTP — when they register they'll be linked to this trip
+    const redirectTo=window.location.origin+'?trip='+encodeURIComponent(STATE.trip.id)+'&tripname='+encodeURIComponent(STATE.trip.name);
+    const {error}=await sb.auth.signInWithOtp({
+      email,
+      options:{shouldCreateUser:true,emailRedirectTo:redirectTo}
+    });
+    if(inviteBtn)inviteBtn.disabled=false;
+    if(error){msg.textContent='Failed to send invite: '+error.message;msg.style.color='var(--red)';msg.classList.add('show');return;}
+    document.getElementById('inviteEmail').value='';
+    msg.textContent='Invite sent to '+email+'! They'll join when they sign up.';
+    msg.style.color='var(--green)';msg.classList.add('show');
+  }
+  if(inviteBtn)inviteBtn.disabled=false;
 }
 
 // ── PROFILE ────────────────────────────────────────────────────────────────
