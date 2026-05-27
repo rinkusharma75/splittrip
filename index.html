@@ -372,7 +372,7 @@ async function registerUser(){
   setLoading('registerBtn',true);
   hideErr('registerErr');
   // Sign up with OTP
-  const {error}=await sb.auth.signInWithOtp({
+  const {data:otpData, error}=await sb.auth.signInWithOtp({
     email,
     options:{
       shouldCreateUser:true,
@@ -380,7 +380,8 @@ async function registerUser(){
     }
   });
   setLoading('registerBtn',false);
-  if(error){showErr('registerErr',error.message);return;}
+  console.log('OTP result:', JSON.stringify(otpData), JSON.stringify(error));
+  if(error){showErr('registerErr', error.message + ' | ' + (error.status||'') + ' | ' + (error.code||''));return;}
   // Store reg data for after OTP verify
   localStorage.setItem('reg_first',first);
   localStorage.setItem('reg_last',last);
