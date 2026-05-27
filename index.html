@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ffffff">
-<title>SplitTrip</title>
+<meta name="theme-color" content="#1a1a1a">
+<title>SplitTrip — Travel. Split. Settle.</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -33,7 +33,15 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 /* AUTH */
 .auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow-y:auto;}
 .auth-hero{text-align:center;padding:32px 0 28px;}
-.auth-icon{width:72px;height:72px;background:var(--bg);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
+.auth-icon{width:80px;height:80px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
+.logo-mark{width:80px;height:80px;}
+.logo-inline{display:flex;align-items:center;gap:10px;}
+.logo-wordmark{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--text);}
+.logo-wordmark span{font-weight:300;color:var(--text2);}
+.topbar-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.topbar-logo-mark{width:32px;height:32px;}
+.topbar-logo-text{font-size:16px;font-weight:700;letter-spacing:-.3px;}
+.topbar-logo-sub{font-size:11px;color:var(--text2);}
 .auth-title{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
 .auth-sub{font-size:15px;color:var(--text2);line-height:1.5;}
 .auth-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
@@ -168,7 +176,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="app">
   <div class="loading-screen" id="loadingScreen">
     <div class="spinner"></div>
-    <div class="loading-text">Loading SplitTrip…</div>
+    <div style="margin-bottom:8px;"><svg class="logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg></div>
+    <div class="loading-text" style="font-size:17px;font-weight:700;letter-spacing:-.3px;">SplitTrip</div>
+    <div class="loading-text" style="font-size:12px;margin-top:4px;">Travel. Split. Settle.</div>
   </div>
 </div>
 
@@ -273,9 +283,9 @@ function renderAuth(){
   <div class="auth-wrap" id="authScreen">
     <div id="loginForm">
       <div class="auth-hero">
-        <div class="auth-icon">✈</div>
+        <div class="auth-icon"><svg class="logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg></div>
         <div class="auth-title">SplitTrip</div>
-        <div class="auth-sub">Track and split travel expenses with your crew.</div>
+        <div class="auth-sub">Travel. Split. Settle.</div>
       </div>
       <div class="auth-card">
         <div class="field">
@@ -290,7 +300,7 @@ function renderAuth(){
 
     <div id="otpForm" class="hidden">
       <div class="auth-hero">
-        <div class="auth-icon">📧</div>
+        <div class="auth-icon"><svg class="logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg></div>
         <div class="auth-title">Check your email</div>
         <div class="auth-sub">Enter the 6-digit code we sent you.</div>
       </div>
@@ -308,7 +318,7 @@ function renderAuth(){
 
     <div id="registerForm" class="hidden">
       <div class="auth-hero">
-        <div class="auth-icon">👋</div>
+        <div class="auth-icon"><svg class="logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg></div>
         <div class="auth-title">Create account</div>
         <div class="auth-sub">Set up your profile and start your first trip.</div>
       </div>
@@ -383,9 +393,12 @@ function renderApp(){
   document.getElementById('app').innerHTML=`
   <div class="shell" id="mainApp">
     <div class="topbar">
-      <div class="topbar-titles">
-        <div class="topbar-title" id="topbarTitle">Dashboard</div>
-        <div class="topbar-trip" id="topbarTrip">${STATE.trip?STATE.trip.name:''}</div>
+      <div class="topbar-logo">
+        <svg class="topbar-logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg>
+        <div>
+          <div class="topbar-logo-text" id="topbarTitle">SplitTrip</div>
+          <div class="topbar-logo-sub" id="topbarTrip"></div>
+        </div>
       </div>
       <div class="topbar-av" id="topbarAv" onclick="navTo('profile')"></div>
     </div>
