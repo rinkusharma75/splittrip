@@ -321,10 +321,6 @@ function renderAuth(){
           <label>Email</label>
           <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
         </div>
-        <div class="field">
-          <label>Trip name</label>
-          <input type="text" id="regTrip" placeholder="e.g. Bali 2026" />
-        </div>
         <button class="btn-main" id="registerBtn" data-label="Create account" onclick="registerUser()">Create account</button>
         <div class="err" id="registerErr"></div>
       </div>
@@ -367,25 +363,16 @@ async function registerUser(){
   const first=document.getElementById('regFirst').value.trim();
   const last=document.getElementById('regLast').value.trim();
   const email=document.getElementById('regEmail').value.trim();
-  const tripName=document.getElementById('regTrip').value.trim();
-  if(!first||!last||!email||!tripName){showErr('registerErr','Please fill in all fields.');return;}
+  if(!first||!last||!email){showErr('registerErr','Please fill in all fields.');return;}
   setLoading('registerBtn',true);
   hideErr('registerErr');
-  // Sign up with OTP
-  const {data:otpData, error}=await sb.auth.signInWithOtp({
+  const redirectTo=window.location.origin+'?first='+encodeURIComponent(first)+'&last='+encodeURIComponent(last);
+  const {error}=await sb.auth.signInWithOtp({
     email,
-    options:{
-      shouldCreateUser:true,
-      data:{first,last,trip_name:tripName}
-    }
+    options:{shouldCreateUser:true,emailRedirectTo:redirectTo,data:{first,last}}
   });
   setLoading('registerBtn',false);
-  console.log('OTP result:', JSON.stringify(otpData), JSON.stringify(error));
-  if(error){showErr('registerErr', error.message + ' | ' + (error.status||'') + ' | ' + (error.code||''));return;}
-  // Store reg data for after OTP verify
-  localStorage.setItem('reg_first',first);
-  localStorage.setItem('reg_last',last);
-  localStorage.setItem('reg_trip',tripName);
+  if(error){showErr('registerErr',error.message+' | '+(error.status||'')+' | '+(error.code||''));return;}
   document.getElementById('otpEmailLabel').textContent=email;
   document.getElementById('loginEmail').value=email;
   hide('registerForm');show('otpForm');
@@ -428,25 +415,67 @@ function renderApp(){
 }
 
 async function checkPostRegSetup(){
-  const first=localStorage.getItem('reg_first');
-  const last=localStorage.getItem('reg_last');
-  const tripName=localStorage.getItem('reg_trip');
-  if(!first||!STATE.session)return;
+  if(!STATE.session)return;
   const uid=STATE.session.user.id;
-  // Update profile
-  await sb.from('profiles').upsert({id:uid,first,last,email:STATE.session.user.email});
-  // Create trip if user has none
-  if(!STATE.trip){
-    const {data:trip}=await sb.from('trips').insert({name:tripName,created_by:uid}).select().single();
-    if(trip){
-      await sb.from('trip_members').insert({trip_id:trip.id,user_id:uid});
-      STATE.trip=trip;
-      await loadTripData();
-    }
+  const params=new URLSearchParams(window.location.search);
+  const first=params.get('first');
+  const last=params.get('last');
+  // Update profile name if passed via URL
+  if(first&&last){
+    await sb.from('profiles').update({first,last}).eq('id',uid);
+    if(STATE.profile){STATE.profile.first=first;STATE.profile.last=last;}
+    window.history.replaceState({},'',window.location.pathname);
   }
-  localStorage.removeItem('reg_first');
-  localStorage.removeItem('reg_last');
-  localStorage.removeItem('reg_trip');
+  refreshTopbar();
+  // If no trip yet, show create/join trip screen
+  if(!STATE.trip){
+    showTripSetup();
+  } else {
+    navTo('home');
+  }
+}
+
+function showTripSetup(){
+  const sa=document.getElementById('scrollArea');
+  if(!sa)return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  const tt=document.getElementById('topbarTitle');
+  if(tt)tt.textContent='Your trips';
+  sa.innerHTML=`<div style="padding:24px 16px;">
+    <div class="form-card">
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Create a new trip</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">Start tracking expenses for your group.</div>
+      <div class="form-field">
+        <label class="form-label">Trip name</label>
+        <input class="form-input" type="text" id="newTripName" placeholder="e.g. Banff 2026" />
+      </div>
+      <button class="btn-submit" onclick="createTrip()">Create trip</button>
+      <div class="err" id="tripErr" style="text-align:center;margin-top:8px;"></div>
+    </div>
+  </div>`;
+}
+
+async function createTrip(){
+  const name=document.getElementById('newTripName').value.trim();
+  if(!name){showErr('tripErr','Enter a trip name.');return;}
+  const uid=STATE.session.user.id;
+  const btn=document.querySelector('#scrollArea .btn-submit');
+  if(btn)btn.disabled=true;
+  const {data:trip,error}=await sb.from('trips').insert({name,created_by:uid}).select().single();
+  if(error){showErr('tripErr',error.message);if(btn)btn.disabled=false;return;}
+  await sb.from('trip_members').insert({trip_id:trip.id,user_id:uid});
+  STATE.trip=trip;
+  await loadTripData();
+  // Restore scroll area pages
+  const sa=document.getElementById('scrollArea');
+  sa.innerHTML=`
+    <div class="page active" id="page-home"></div>
+    <div class="page" id="page-expenses"></div>
+    <div class="page" id="page-add"></div>
+    <div class="page" id="page-settle"></div>
+    <div class="page" id="page-members"></div>
+    <div class="page" id="page-profile"></div>`;
   refreshTopbar();
   navTo('home');
 }
