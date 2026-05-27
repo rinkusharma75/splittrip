@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#ffffff">
 <title>SplitTrip</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:16px;}
@@ -15,51 +16,51 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   --bg:#ffffff;--bg2:#f5f5f0;--bg3:#ebebeb;
   --text:#1a1a1a;--text2:#6b6b6b;--text3:#9b9b9b;
   --border:#e0e0e0;--border2:#d0d0d0;
-  --radius:12px;--radius-lg:16px;--radius-xl:20px;
+  --radius:12px;--radius-lg:16px;
   --green:#1D9E75;--red:#D85A30;
 }
 @media(prefers-color-scheme:dark){
-  :root{
-    --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
-    --text:#f2f2f7;--text2:#aeaeb2;--text3:#6d6d70;
-    --border:#3a3a3c;--border2:#48484a;
-  }
+  :root{--bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--text:#f2f2f7;--text2:#aeaeb2;--text3:#6d6d70;--border:#3a3a3c;--border2:#48484a;}
 }
-
-/* APP SHELL */
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;background:var(--bg2);}
+
+/* LOADING */
+.loading-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:15px;color:var(--text2);}
 
 /* AUTH */
 .auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow-y:auto;}
 .auth-hero{text-align:center;padding:32px 0 28px;}
 .auth-icon{width:72px;height:72px;background:var(--bg);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
-.auth-title{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+.auth-title{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
 .auth-sub{font-size:15px;color:var(--text2);line-height:1.5;}
-.auth-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;}
+.auth-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
 .field{margin-bottom:16px;}
-.field:last-of-type{margin-bottom:0;}
 .field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase;}
-.field input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
+.field input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;transition:border-color .15s;}
 .field input:focus{border-color:var(--text);background:var(--bg);}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.btn-main{width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:17px;font-weight:600;cursor:pointer;margin-top:16px;letter-spacing:-.2px;}
-.btn-main:active{opacity:.8;transform:scale(.99);}
+.btn-main{width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:17px;font-weight:600;cursor:pointer;margin-top:16px;position:relative;}
+.btn-main:active{opacity:.8;}
+.btn-main:disabled{opacity:.5;}
 .auth-link{text-align:center;margin-top:16px;font-size:15px;color:var(--text2);}
 .auth-link span{color:var(--text);font-weight:600;cursor:pointer;}
 .otp-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:14px;color:var(--text2);line-height:1.5;}
-.otp-code{font-family:monospace;font-size:12px;color:var(--text3);margin-top:4px;}
-.err{font-size:13px;color:var(--red);margin-top:6px;display:none;}
+.err{font-size:13px;color:var(--red);margin-top:8px;display:none;text-align:center;}
 .err.show{display:block;}
+.info{font-size:13px;color:var(--green);margin-top:8px;display:none;text-align:center;}
+.info.show{display:block;}
 
-/* MAIN SHELL */
+/* SHELL */
 .shell{flex:1;display:flex;flex-direction:column;min-height:0;}
 .topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .topbar-titles{flex:1;min-width:0;}
-.topbar-title{font-size:18px;font-weight:700;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-title{font-size:18px;font-weight:700;letter-spacing:-.3px;}
 .topbar-trip{font-size:12px;color:var(--text2);margin-top:1px;}
 .topbar-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer;}
 .topbar-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .page{padding:16px;display:none;}
 .page.active{display:block;}
@@ -81,7 +82,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .green{color:var(--green);}
 .red{color:var(--red);}
 
-/* SECTION CARD */
+/* SECTION */
 .section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;}
 .section-head{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;}
 .section-title{font-size:15px;font-weight:700;}
@@ -96,13 +97,13 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .exp-amt{font-size:16px;font-weight:700;flex-shrink:0;}
 .del-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);border-radius:10px;background:none;cursor:pointer;color:var(--red);flex-shrink:0;font-size:16px;}
 
-/* BAR CHART */
+/* BAR */
 .bar-row{display:flex;align-items:center;gap:10px;padding:8px 16px;}
 .bar-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;overflow:hidden;}
 .bar-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .bar-name{font-size:13px;font-weight:500;width:52px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bar-track{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.bar-fill{height:100%;border-radius:4px;}
 .bar-val{font-size:12px;font-weight:600;min-width:52px;text-align:right;flex-shrink:0;}
 
 /* AVATAR */
@@ -115,7 +116,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .settle-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
 .settle-amt{font-size:15px;font-weight:700;margin-left:auto;flex-shrink:0;}
 
-/* MEMBER ROW */
+/* MEMBER */
 .member-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);}
 .member-info{flex:1;min-width:0;}
 .member-name{font-size:15px;font-weight:600;}
@@ -125,7 +126,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .form-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;}
 .form-field{margin-bottom:16px;}
 .form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px;}
-.form-input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;appearance:none;}
+.form-input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;}
 .form-input:focus{border-color:var(--text);background:var(--bg);}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
@@ -133,6 +134,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .chip.on{background:var(--text);color:var(--bg);border-color:var(--text);}
 .chip input{display:none;}
 .btn-submit{width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:17px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-submit:disabled{opacity:.5;}
 .btn-submit:active{opacity:.8;}
 
 /* FILTER */
@@ -144,7 +146,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 /* INVITE */
 .invite-wrap{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
 .invite-input{flex:1;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:15px;background:var(--bg2);color:var(--text);outline:none;}
-.invite-btn{padding:12px 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.invite-btn{padding:12px 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;}
+.invite-msg{font-size:13px;padding:4px 16px 12px;display:none;}
+.invite-msg.show{display:block;}
 
 /* PROFILE */
 .profile-hero{text-align:center;padding:24px 16px 16px;}
@@ -152,313 +156,312 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .av-edit{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--text);color:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
 .profile-name{font-size:20px;font-weight:700;letter-spacing:-.3px;}
 .profile-email-disp{font-size:14px;color:var(--text2);margin-top:4px;}
-.btn-outline{width:100%;padding:14px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
 .btn-danger{width:100%;padding:14px;background:transparent;color:var(--red);border:1px solid rgba(216,90,48,.3);border-radius:var(--radius);font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
 .save-msg{font-size:14px;color:var(--green);text-align:center;margin-top:10px;display:none;}
 .save-msg.show{display:block;}
-.pb-safe{height:env(safe-area-inset-bottom);height:24px;}
+.pb-safe{height:24px;}
 .hidden{display:none!important;}
-.invite-msg{font-size:13px;padding:6px 16px 10px;display:none;}
-.invite-msg.show{display:block;}
+.empty-state{padding:24px 16px;text-align:center;font-size:14px;color:var(--text2);}
 </style>
 </head>
 <body>
 <div id="app">
-
-<!-- AUTH -->
-<div class="auth-wrap" id="authScreen">
-  <div id="loginForm">
-    <div class="auth-hero">
-      <div class="auth-icon">✈</div>
-      <div class="auth-title">SplitTrip</div>
-      <div class="auth-sub">Track and split travel expenses with your crew.</div>
-    </div>
-    <div class="auth-card">
-      <div class="field">
-        <label>Email address</label>
-        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
-      </div>
-      <button class="btn-main" onclick="sendOtp()">Send OTP</button>
-    </div>
-    <div class="auth-link">No account? <span onclick="showRegister()">Register</span></div>
-  </div>
-
-  <div id="otpForm" class="hidden">
-    <div class="auth-hero">
-      <div class="auth-icon">📧</div>
-      <div class="auth-title">Check your email</div>
-      <div class="auth-sub">We sent a 6-digit code to verify your identity.</div>
-    </div>
-    <div class="auth-card">
-      <div class="otp-banner">Code sent to <strong id="otpEmailLabel"></strong><div class="otp-code" id="otpCodeHint"></div></div>
-      <div class="field">
-        <label>6-digit code</label>
-        <input type="tel" id="otpInput" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
-        <div class="err" id="otpErr">Invalid code — try again.</div>
-      </div>
-      <button class="btn-main" onclick="verifyOtp()">Verify & sign in</button>
-    </div>
-    <div class="auth-link"><span onclick="showLogin()">← Back</span></div>
-  </div>
-
-  <div id="registerForm" class="hidden">
-    <div class="auth-hero">
-      <div class="auth-icon">👋</div>
-      <div class="auth-title">Create account</div>
-      <div class="auth-sub">Set up your profile and start your first trip.</div>
-    </div>
-    <div class="auth-card">
-      <div class="field field-row">
-        <div><label>First name</label><input type="text" id="regFirst" placeholder="Jane" autocomplete="given-name" /></div>
-        <div><label>Last name</label><input type="text" id="regLast" placeholder="Smith" autocomplete="family-name" /></div>
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
-      </div>
-      <div class="field">
-        <label>Trip name</label>
-        <input type="text" id="regTrip" placeholder="e.g. Bali 2026" />
-      </div>
-      <button class="btn-main" onclick="registerUser()">Create account</button>
-    </div>
-    <div class="auth-link">Have an account? <span onclick="showLogin()">Sign in</span></div>
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading SplitTrip…</div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<div class="shell hidden" id="mainApp">
-  <div class="topbar">
-    <div class="topbar-titles">
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <div class="topbar-trip" id="topbarTrip"></div>
-    </div>
-    <div class="topbar-av" id="topbarAv" onclick="navTo('profile')"></div>
-  </div>
-
-  <div class="scroll" id="scrollArea">
-
-    <div class="page active" id="page-home">
-      <div class="metrics" id="metricGrid"></div>
-      <div class="section">
-        <div class="section-head"><span class="section-title">Spending by person</span></div>
-        <div id="spendBars" style="padding-bottom:12px;"></div>
-      </div>
-      <div class="section">
-        <div class="section-head"><span class="section-title">Recent</span><span class="section-more" onclick="navTo('expenses')">See all</span></div>
-        <div id="recentList"></div>
-      </div>
-      <div class="pb-safe"></div>
-    </div>
-
-    <div class="page" id="page-expenses">
-      <div class="filter-row" id="filterRow">
-        <div class="fpill on" onclick="filterExp('all',this)">All</div>
-        <div class="fpill" onclick="filterExp('Food',this)">Food</div>
-        <div class="fpill" onclick="filterExp('Transport',this)">Transport</div>
-        <div class="fpill" onclick="filterExp('Accommodation',this)">Accommodation</div>
-        <div class="fpill" onclick="filterExp('Activities',this)">Activities</div>
-        <div class="fpill" onclick="filterExp('Other',this)">Other</div>
-      </div>
-      <div class="section"><div id="expList"></div></div>
-      <div class="pb-safe"></div>
-    </div>
-
-    <div class="page" id="page-add">
-      <div class="form-card">
-        <div class="form-field">
-          <label class="form-label">Description</label>
-          <input class="form-input" type="text" id="expDesc" placeholder="e.g. Dinner at Casa Bali" />
-        </div>
-        <div class="form-row-2">
-          <div class="form-field">
-            <label class="form-label">Amount (CAD)</label>
-            <input class="form-input" type="number" id="expAmt" placeholder="0.00" inputmode="decimal" min="0" step="0.01" />
-          </div>
-          <div class="form-field">
-            <label class="form-label">Date</label>
-            <input class="form-input" type="date" id="expDate" />
-          </div>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Category</label>
-          <select class="form-input" id="expCat">
-            <option>Food</option><option>Transport</option><option>Accommodation</option><option>Activities</option><option>Other</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Paid by</label>
-          <select class="form-input" id="expPaidBy"></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Paid for</label>
-          <div class="chip-group" id="expPaidFor"></div>
-        </div>
-        <button class="btn-submit" onclick="addExpense()">Add expense</button>
-        <div class="err" id="addErr" style="text-align:center;margin-top:10px;"></div>
-      </div>
-      <div class="pb-safe"></div>
-    </div>
-
-    <div class="page" id="page-settle">
-      <div class="metrics" id="settleMetrics"></div>
-      <div class="section">
-        <div class="section-head"><span class="section-title">Balances</span></div>
-        <div id="balList"></div>
-      </div>
-      <div class="section">
-        <div class="section-head"><span class="section-title">Who pays whom</span></div>
-        <div id="settleList"></div>
-      </div>
-      <div class="pb-safe"></div>
-    </div>
-
-    <div class="page" id="page-members">
-      <div class="section">
-        <div id="memberList"></div>
-        <div class="invite-wrap">
-          <input class="invite-input" type="email" id="inviteEmail" placeholder="friend@example.com" inputmode="email" />
-          <button class="invite-btn" onclick="inviteMember()">Invite</button>
-        </div>
-        <div class="invite-msg" id="inviteMsg"></div>
-      </div>
-      <div class="pb-safe"></div>
-    </div>
-
-    <div class="page" id="page-profile">
-      <div class="section" style="overflow:visible;">
-        <div class="profile-hero">
-          <div class="av-wrap">
-            <div class="av av-lg" id="profileAv"></div>
-            <button class="av-edit" onclick="document.getElementById('avUpload').click()" aria-label="Change photo"><i class="ti ti-pencil"></i></button>
-            <input type="file" id="avUpload" accept="image/*" class="hidden" onchange="uploadAvatar(event)" />
-          </div>
-          <div class="profile-name" id="profileName"></div>
-          <div class="profile-email-disp" id="profileEmailDisp"></div>
-        </div>
-        <div style="padding:0 16px 16px;">
-          <div class="form-row-2" style="margin-bottom:12px;">
-            <div class="form-field"><label class="form-label">First name</label><input class="form-input" type="text" id="pfFirst" /></div>
-            <div class="form-field"><label class="form-label">Last name</label><input class="form-input" type="text" id="pfLast" /></div>
-          </div>
-          <button class="btn-submit" onclick="saveProfile()">Save changes</button>
-          <div class="save-msg" id="saveMsg">Profile updated ✓</div>
-          <button class="btn-danger" onclick="logout()"><i class="ti ti-logout"></i> Sign out</button>
-        </div>
-      </div>
-      <div class="pb-safe"></div>
-    </div>
-
-  </div>
-
-  <div class="bnav">
-    <button class="bnav-btn active" id="nb-home" onclick="navTo('home')" aria-label="Home"><i class="ti ti-layout-dashboard"></i>Home</button>
-    <button class="bnav-btn" id="nb-expenses" onclick="navTo('expenses')" aria-label="Expenses"><i class="ti ti-receipt"></i>Expenses</button>
-    <button class="bnav-add" onclick="navTo('add')" aria-label="Add">
-      <div class="add-circle"><i class="ti ti-plus"></i></div>
-      <span style="font-size:10px;font-weight:500;color:var(--text2);margin-top:2px;">Add</span>
-    </button>
-    <button class="bnav-btn" id="nb-settle" onclick="navTo('settle')" aria-label="Settle"><i class="ti ti-arrows-exchange"></i>Settle</button>
-    <button class="bnav-btn" id="nb-members" onclick="navTo('members')" aria-label="Members"><i class="ti ti-users"></i>Members</button>
-  </div>
-</div>
-
-</div>
 <script>
+const SUPABASE_URL = 'https://lwbnebgqfhavsrboxpak.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3Ym5lYmdxZmhhdnNyYm94cGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTA3MzMsImV4cCI6MjA5NTQ2NjczM30.NGqeDNXd9gLBxEoUksmDN_FPqAs45YL5O4gyvA7_J2Y';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
 const COLORS=[{bg:'#E6F1FB',fg:'#0C447C'},{bg:'#E1F5EE',fg:'#085041'},{bg:'#FAEEDA',fg:'#633806'},{bg:'#FBEAF0',fg:'#72243E'},{bg:'#EEEDFE',fg:'#3C3489'},{bg:'#FAECE7',fg:'#993C1D'}];
 const CAT_COLORS={Food:{bg:'#E1F5EE',fg:'#085041'},Transport:{bg:'#E6F1FB',fg:'#0C447C'},Accommodation:{bg:'#EEEDFE',fg:'#3C3489'},Activities:{bg:'#FAEEDA',fg:'#633806'},Other:{bg:'#F1EFE8',fg:'#444441'}};
 const CAT_ICONS={Food:'ti-tools-kitchen-2',Transport:'ti-car',Accommodation:'ti-building',Activities:'ti-mountain',Other:'ti-dots'};
 const PAGE_TITLES={home:'Dashboard',expenses:'Expenses',add:'Add expense',settle:'Settlement',members:'Members',profile:'Profile'};
 
-let S={user:null,users:[],expenses:[],trip:'My Trip',otp:null,otpEmail:null};
+let STATE = {
+  session: null,
+  profile: null,
+  trip: null,
+  members: [],
+  expenses: [],
+  profiles: {}
+};
 
-function uid(){return Math.random().toString(36).slice(2);}
+// ── UTILS ──────────────────────────────────────────────────────────────────
 function fmt(n){return '$'+Math.abs(n).toFixed(2);}
-function colorFor(id){const i=S.users.findIndex(u=>u.id===id);return COLORS[i%COLORS.length]||COLORS[0];}
-function initials(u){return((u.first||'?')[0]+(u.last||'?')[0]).toUpperCase();}
-
-function avHTML(u,cls){
-  const c=colorFor(u.id);
-  if(u.avatar)return`<div class="av ${cls||''}" style="overflow:hidden;"><img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>`;
-  return`<div class="av ${cls||''}" style="background:${c.bg};color:${c.fg};">${initials(u)}</div>`;
+function colorFor(id){
+  const ids=Object.keys(STATE.profiles).sort();
+  const i=ids.indexOf(id);
+  return COLORS[i%COLORS.length]||COLORS[0];
+}
+function initials(p){if(!p)return'?';return((p.first||'?')[0]+(p.last||'')[0]||'').toUpperCase();}
+function avHTML(p,cls){
+  if(!p)return`<div class="av ${cls||''}"></div>`;
+  const c=colorFor(p.id);
+  if(p.avatar_url)return`<div class="av ${cls||''}" style="overflow:hidden;"><img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>`;
+  return`<div class="av ${cls||''}" style="background:${c.bg};color:${c.fg};">${initials(p)}</div>`;
+}
+function show(id){const e=document.getElementById(id);if(e)e.classList.remove('hidden');}
+function hide(id){const e=document.getElementById(id);if(e)e.classList.add('hidden');}
+function showErr(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.add('show');}}
+function hideErr(id){const e=document.getElementById(id);if(e)e.classList.remove('show');}
+function showInfo(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.add('show');}}
+function setLoading(btnId,loading){
+  const b=document.getElementById(btnId);
+  if(b){b.disabled=loading;b.textContent=loading?'Please wait…':b.dataset.label||b.textContent;}
 }
 
-function seedDemo(me){
-  S.trip=me.tripName||'My Trip';
-  const others=[
-    {id:uid(),first:'Sam',last:'Park',email:'sam@demo.com',avatar:null},
-    {id:uid(),first:'Mia',last:'Torres',email:'mia@demo.com',avatar:null},
-    {id:uid(),first:'Leo',last:'Chan',email:'leo@demo.com',avatar:null}
-  ];
-  S.users=[me,...others];
-  const [m,s,mi,l]=S.users.map(u=>u.id);
-  S.expenses=[
-    {id:uid(),desc:'Hotel night 1',amount:320,category:'Accommodation',paidBy:m,paidFor:[m,s,mi,l],date:'2026-05-10'},
-    {id:uid(),desc:'Airport taxi',amount:48,category:'Transport',paidBy:s,paidFor:[m,s,mi,l],date:'2026-05-10'},
-    {id:uid(),desc:'Dinner at La Playa',amount:140,category:'Food',paidBy:mi,paidFor:[m,s,mi,l],date:'2026-05-11'},
-    {id:uid(),desc:'Snorkelling tour',amount:200,category:'Activities',paidBy:m,paidFor:[m,s,mi,l],date:'2026-05-11'},
-    {id:uid(),desc:'Grocery run',amount:62,category:'Food',paidBy:l,paidFor:[m,s,mi,l],date:'2026-05-12'},
-    {id:uid(),desc:'Scooter rental',amount:90,category:'Transport',paidBy:m,paidFor:[m,s],date:'2026-05-12'},
-    {id:uid(),desc:'Spa for two',amount:110,category:'Activities',paidBy:mi,paidFor:[mi,l],date:'2026-05-13'},
-  ];
+// ── INIT ───────────────────────────────────────────────────────────────────
+async function init(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(session){
+    STATE.session = session;
+    await loadUserData();
+    renderApp();
+  } else {
+    renderAuth();
+  }
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session){
+      STATE.session=session;
+      await loadUserData();
+      renderApp();
+    }
+    if(event==='SIGNED_OUT'){
+      STATE={session:null,profile:null,trip:null,members:[],expenses:[],profiles:{}};
+      renderAuth();
+    }
+  });
 }
 
-function v(id){return document.getElementById(id).value.trim();}
-function show(id){document.getElementById(id).classList.remove('hidden');}
-function hide(id){document.getElementById(id).classList.add('hidden');}
-function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
-function hideErr(id){document.getElementById(id).classList.remove('show');}
+async function loadUserData(){
+  const uid=STATE.session.user.id;
+  // Load profile
+  const {data:profile}=await sb.from('profiles').select('*').eq('id',uid).single();
+  STATE.profile=profile;
+  // Load trip (first trip user is member of)
+  const {data:membership}=await sb.from('trip_members').select('trip_id').eq('user_id',uid).limit(1).single();
+  if(membership){
+    const {data:trip}=await sb.from('trips').select('*').eq('id',membership.trip_id).single();
+    STATE.trip=trip;
+    await loadTripData();
+  }
+}
 
-function showLogin(){show('loginForm');hide('otpForm');hide('registerForm');}
-function showRegister(){hide('loginForm');hide('otpForm');show('registerForm');}
+async function loadTripData(){
+  if(!STATE.trip)return;
+  const tid=STATE.trip.id;
+  // Load members
+  const {data:members}=await sb.from('trip_members').select('user_id').eq('trip_id',tid);
+  const uids=members.map(m=>m.user_id);
+  const {data:profiles}=await sb.from('profiles').select('*').in('id',uids);
+  STATE.members=profiles||[];
+  const pm={};(profiles||[]).forEach(p=>pm[p.id]=p);
+  STATE.profiles=pm;
+  // Load expenses
+  const {data:expenses}=await sb.from('expenses').select('*').eq('trip_id',tid).order('date',{ascending:false});
+  STATE.expenses=expenses||[];
+}
 
-function sendOtp(){
-  const email=v('loginEmail');
-  if(!email||!email.includes('@'))return;
-  const u=S.users.find(x=>x.email===email);
-  if(!u){alert('No account found. Please register.');return;}
-  S.otp=String(Math.floor(100000+Math.random()*900000));S.otpEmail=email;
+// ── AUTH RENDER ────────────────────────────────────────────────────────────
+function renderAuth(){
+  document.getElementById('app').innerHTML=`
+  <div class="auth-wrap" id="authScreen">
+    <div id="loginForm">
+      <div class="auth-hero">
+        <div class="auth-icon">✈</div>
+        <div class="auth-title">SplitTrip</div>
+        <div class="auth-sub">Track and split travel expenses with your crew.</div>
+      </div>
+      <div class="auth-card">
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+        </div>
+        <button class="btn-main" id="sendOtpBtn" data-label="Send OTP" onclick="sendOtp()">Send OTP</button>
+        <div class="err" id="loginErr"></div>
+      </div>
+      <div class="auth-link">No account? <span onclick="showRegister()">Register</span></div>
+    </div>
+
+    <div id="otpForm" class="hidden">
+      <div class="auth-hero">
+        <div class="auth-icon">📧</div>
+        <div class="auth-title">Check your email</div>
+        <div class="auth-sub">Enter the 6-digit code we sent you.</div>
+      </div>
+      <div class="auth-card">
+        <div class="otp-banner">Code sent to <strong id="otpEmailLabel"></strong></div>
+        <div class="field">
+          <label>6-digit code</label>
+          <input type="tel" id="otpInput" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+          <div class="err" id="otpErr"></div>
+        </div>
+        <button class="btn-main" id="verifyOtpBtn" data-label="Verify & sign in" onclick="verifyOtp()">Verify & sign in</button>
+      </div>
+      <div class="auth-link"><span onclick="showLoginForm()">← Back</span></div>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <div class="auth-hero">
+        <div class="auth-icon">👋</div>
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">Set up your profile and start your first trip.</div>
+      </div>
+      <div class="auth-card">
+        <div class="field field-row">
+          <div><label>First name</label><input type="text" id="regFirst" placeholder="Jane" autocomplete="given-name" /></div>
+          <div><label>Last name</label><input type="text" id="regLast" placeholder="Smith" autocomplete="family-name" /></div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+        </div>
+        <div class="field">
+          <label>Trip name</label>
+          <input type="text" id="regTrip" placeholder="e.g. Bali 2026" />
+        </div>
+        <button class="btn-main" id="registerBtn" data-label="Create account" onclick="registerUser()">Create account</button>
+        <div class="err" id="registerErr"></div>
+      </div>
+      <div class="auth-link">Have an account? <span onclick="showLoginForm()">Sign in</span></div>
+    </div>
+  </div>`;
+}
+
+function showLoginForm(){
+  show('loginForm');hide('otpForm');hide('registerForm');
+}
+function showRegister(){
+  hide('loginForm');hide('otpForm');show('registerForm');
+}
+
+async function sendOtp(){
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email||!email.includes('@')){showErr('loginErr','Enter a valid email.');return;}
+  setLoading('sendOtpBtn',true);
+  hideErr('loginErr');
+  const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+  setLoading('sendOtpBtn',false);
+  if(error){showErr('loginErr',error.message);return;}
   document.getElementById('otpEmailLabel').textContent=email;
-  document.getElementById('otpCodeHint').textContent='Demo code: '+S.otp;
-  hideErr('otpErr');
   hide('loginForm');show('otpForm');
 }
 
-function verifyOtp(){
-  if(document.getElementById('otpInput').value.trim()===S.otp){
-    launch(S.users.find(u=>u.email===S.otpEmail));
-  }else{showErr('otpErr','Invalid code — try again.');}
+async function verifyOtp(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const token=document.getElementById('otpInput').value.trim();
+  if(!token||token.length<6){showErr('otpErr','Enter the 6-digit code.');return;}
+  setLoading('verifyOtpBtn',true);
+  hideErr('otpErr');
+  const {error}=await sb.auth.verifyOtp({email,token,type:'email'});
+  setLoading('verifyOtpBtn',false);
+  if(error){showErr('otpErr',error.message);return;}
 }
 
-function registerUser(){
-  const f=v('regFirst'),l=v('regLast'),e=v('regEmail'),t=v('regTrip');
-  if(!f||!l||!e||!t){alert('Please fill in all fields.');return;}
-  if(S.users.find(u=>u.email===e)){alert('Email already registered.');return;}
-  const newU={id:uid(),first:f,last:l,email:e,avatar:null,tripName:t};
-  seedDemo(newU);launch(newU);
+async function registerUser(){
+  const first=document.getElementById('regFirst').value.trim();
+  const last=document.getElementById('regLast').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const tripName=document.getElementById('regTrip').value.trim();
+  if(!first||!last||!email||!tripName){showErr('registerErr','Please fill in all fields.');return;}
+  setLoading('registerBtn',true);
+  hideErr('registerErr');
+  // Sign up with OTP
+  const {error}=await sb.auth.signInWithOtp({
+    email,
+    options:{
+      shouldCreateUser:true,
+      data:{first,last,trip_name:tripName}
+    }
+  });
+  setLoading('registerBtn',false);
+  if(error){showErr('registerErr',error.message);return;}
+  // Store reg data for after OTP verify
+  localStorage.setItem('reg_first',first);
+  localStorage.setItem('reg_last',last);
+  localStorage.setItem('reg_trip',tripName);
+  document.getElementById('otpEmailLabel').textContent=email;
+  document.getElementById('loginEmail').value=email;
+  hide('registerForm');show('otpForm');
 }
 
-function launch(u){
-  S.user=u;
-  hide('authScreen');show('mainApp');
-  refreshTopbar();navTo('home');
+// ── APP RENDER ─────────────────────────────────────────────────────────────
+function renderApp(){
+  document.getElementById('app').innerHTML=`
+  <div class="shell" id="mainApp">
+    <div class="topbar">
+      <div class="topbar-titles">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-trip" id="topbarTrip">${STATE.trip?STATE.trip.name:''}</div>
+      </div>
+      <div class="topbar-av" id="topbarAv" onclick="navTo('profile')"></div>
+    </div>
+    <div class="scroll" id="scrollArea">
+      <div class="page active" id="page-home"></div>
+      <div class="page" id="page-expenses"></div>
+      <div class="page" id="page-add"></div>
+      <div class="page" id="page-settle"></div>
+      <div class="page" id="page-members"></div>
+      <div class="page" id="page-profile"></div>
+    </div>
+    <div class="bnav">
+      <button class="bnav-btn active" id="nb-home" onclick="navTo('home')" aria-label="Home"><i class="ti ti-layout-dashboard"></i>Home</button>
+      <button class="bnav-btn" id="nb-expenses" onclick="navTo('expenses')" aria-label="Expenses"><i class="ti ti-receipt"></i>Expenses</button>
+      <button class="bnav-add" onclick="navTo('add')" aria-label="Add">
+        <div class="add-circle"><i class="ti ti-plus"></i></div>
+        <span style="font-size:10px;font-weight:500;color:var(--text2);margin-top:2px;">Add</span>
+      </button>
+      <button class="bnav-btn" id="nb-settle" onclick="navTo('settle')" aria-label="Settle"><i class="ti ti-arrows-exchange"></i>Settle</button>
+      <button class="bnav-btn" id="nb-members" onclick="navTo('members')" aria-label="Members"><i class="ti ti-users"></i>Members</button>
+    </div>
+  </div>`;
+  // Handle post-registration trip creation
+  checkPostRegSetup();
+  refreshTopbar();
+  navTo('home');
 }
 
-function logout(){
-  S.user=null;
-  hide('mainApp');show('authScreen');showLogin();
+async function checkPostRegSetup(){
+  const first=localStorage.getItem('reg_first');
+  const last=localStorage.getItem('reg_last');
+  const tripName=localStorage.getItem('reg_trip');
+  if(!first||!STATE.session)return;
+  const uid=STATE.session.user.id;
+  // Update profile
+  await sb.from('profiles').upsert({id:uid,first,last,email:STATE.session.user.email});
+  // Create trip if user has none
+  if(!STATE.trip){
+    const {data:trip}=await sb.from('trips').insert({name:tripName,created_by:uid}).select().single();
+    if(trip){
+      await sb.from('trip_members').insert({trip_id:trip.id,user_id:uid});
+      STATE.trip=trip;
+      await loadTripData();
+    }
+  }
+  localStorage.removeItem('reg_first');
+  localStorage.removeItem('reg_last');
+  localStorage.removeItem('reg_trip');
+  refreshTopbar();
+  navTo('home');
 }
 
 function refreshTopbar(){
-  const u=S.user;
-  document.getElementById('topbarTrip').textContent=S.trip;
+  const p=STATE.profile;
+  const t=document.getElementById('topbarTrip');
   const av=document.getElementById('topbarAv');
-  const c=colorFor(u.id);
-  if(u.avatar){
-    av.innerHTML=`<img src="${u.avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`;
+  if(t)t.textContent=STATE.trip?STATE.trip.name:'';
+  if(!av||!p)return;
+  const c=colorFor(p.id);
+  if(p.avatar_url){
+    av.innerHTML=`<img src="${p.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`;
     av.style.background='none';
   }else{
-    av.textContent=initials(u);
+    av.textContent=initials(p);
     av.style.background=c.bg;av.style.color=c.fg;av.style.fontWeight='700';av.style.fontSize='13px';
   }
 }
@@ -466,11 +469,14 @@ function refreshTopbar(){
 function navTo(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  const pg=document.getElementById('page-'+name);
+  if(pg)pg.classList.add('active');
   const nb=document.getElementById('nb-'+name);
   if(nb)nb.classList.add('active');
-  document.getElementById('topbarTitle').textContent=PAGE_TITLES[name]||'SplitTrip';
-  document.getElementById('scrollArea').scrollTop=0;
+  const tt=document.getElementById('topbarTitle');
+  if(tt)tt.textContent=PAGE_TITLES[name]||'SplitTrip';
+  const sa=document.getElementById('scrollArea');
+  if(sa)sa.scrollTop=0;
   if(name==='home')renderHome();
   if(name==='expenses')renderExpenses('all');
   if(name==='add')renderAddForm();
@@ -479,93 +485,25 @@ function navTo(name){
   if(name==='profile')renderProfile();
 }
 
+// ── BALANCES ───────────────────────────────────────────────────────────────
 function getBalances(){
-  const b={};S.users.forEach(u=>b[u.id]=0);
-  S.expenses.forEach(e=>{
-    const pp=e.amount/e.paidFor.length;
-    e.paidFor.forEach(id=>{if(id!==e.paidBy){b[e.paidBy]+=pp;b[id]-=pp;}});
+  const b={};STATE.members.forEach(u=>b[u.id]=0);
+  STATE.expenses.forEach(e=>{
+    if(!e.paid_for||!e.paid_for.length)return;
+    const pp=e.amount/e.paid_for.length;
+    e.paid_for.forEach(uid=>{
+      if(uid!==e.paid_by){
+        if(b[e.paid_by]!==undefined)b[e.paid_by]+=pp;
+        if(b[uid]!==undefined)b[uid]-=pp;
+      }
+    });
   });return b;
 }
 function getTotals(){
-  const t={};S.users.forEach(u=>t[u.id]=0);
-  S.expenses.forEach(e=>t[e.paidBy]+=e.amount);return t;
+  const t={};STATE.members.forEach(u=>t[u.id]=0);
+  STATE.expenses.forEach(e=>{if(t[e.paid_by]!==undefined)t[e.paid_by]+=Number(e.amount);});
+  return t;
 }
-
-function renderHome(){
-  const total=S.expenses.reduce((s,e)=>s+e.amount,0);
-  const tots=getTotals();const bals=getBalances();
-  const myPaid=tots[S.user.id]||0;const myBal=bals[S.user.id]||0;
-  document.getElementById('metricGrid').innerHTML=`
-    <div class="metric"><div class="metric-label">Total spent</div><div class="metric-val">${fmt(total)}</div></div>
-    <div class="metric"><div class="metric-label">You paid</div><div class="metric-val">${fmt(myPaid)}</div></div>
-    <div class="metric"><div class="metric-label">Your balance</div><div class="metric-val ${myBal>=0?'green':'red'}">${myBal>=0?'+':'−'}${fmt(myBal)}</div></div>
-    <div class="metric"><div class="metric-label">Expenses</div><div class="metric-val">${S.expenses.length}</div></div>`;
-  const maxP=Math.max(...Object.values(tots),1);
-  document.getElementById('spendBars').innerHTML=S.users.map(u=>{
-    const c=colorFor(u.id);const pct=((tots[u.id]||0)/maxP*100).toFixed(1);
-    return`<div class="bar-row">${avHTML(u,'bar-av')}<div class="bar-name">${u.first}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.bg};border:1px solid ${c.fg}30;"></div></div><div class="bar-val">${fmt(tots[u.id]||0)}</div></div>`;
-  }).join('');
-  const recent=[...S.expenses].reverse().slice(0,5);
-  document.getElementById('recentList').innerHTML=recent.length?recent.map(e=>expRowHTML(e)).join(''):`<div style="padding:16px;font-size:14px;color:var(--text2);">No expenses yet.</div>`;
-}
-
-function expRowHTML(e){
-  const payer=S.users.find(u=>u.id===e.paidBy);
-  const cc=CAT_COLORS[e.category]||CAT_COLORS.Other;
-  const ci=CAT_ICONS[e.category]||'ti-dots';
-  return`<div class="exp-row">
-    <div class="exp-icon" style="background:${cc.bg};color:${cc.fg};"><i class="ti ${ci}"></i></div>
-    <div class="exp-body"><div class="exp-desc">${e.desc}</div><div class="exp-meta">${e.date} · ${payer?payer.first:'?'} · ${e.paidFor.length} people</div></div>
-    <div class="exp-amt">${fmt(e.amount)}</div>
-    <button class="del-btn" onclick="delExp('${e.id}')" aria-label="Delete"><i class="ti ti-trash"></i></button>
-  </div>`;
-}
-
-function renderExpenses(cat){
-  const list=cat==='all'?S.expenses:S.expenses.filter(e=>e.category===cat);
-  document.getElementById('expList').innerHTML=[...list].reverse().map(e=>expRowHTML(e)).join('')||`<div style="padding:16px;font-size:14px;color:var(--text2);">No expenses here.</div>`;
-}
-
-function filterExp(cat,el){
-  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
-  el.classList.add('on');renderExpenses(cat);
-}
-
-function delExp(id){
-  S.expenses=S.expenses.filter(e=>e.id!==id);
-  renderExpenses('all');
-  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
-  document.querySelector('.fpill').classList.add('on');
-}
-
-function renderAddForm(){
-  const pb=document.getElementById('expPaidBy');
-  pb.innerHTML=S.users.map(u=>`<option value="${u.id}">${u.first} ${u.last}</option>`).join('');
-  pb.value=S.user.id;
-  document.getElementById('expPaidFor').innerHTML=S.users.map(u=>`
-    <label class="chip on" id="chip-${u.id}">
-      <input type="checkbox" value="${u.id}" checked onchange="toggleChip('${u.id}',this)" />
-      ${initials(u)} ${u.first}
-    </label>`).join('');
-  document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
-  document.getElementById('expDesc').value='';
-  document.getElementById('expAmt').value='';
-  hideErr('addErr');
-}
-
-function toggleChip(id,cb){document.getElementById('chip-'+id).classList.toggle('on',cb.checked);}
-
-function addExpense(){
-  const desc=v('expDesc'),amt=parseFloat(document.getElementById('expAmt').value),cat=document.getElementById('expCat').value,date=document.getElementById('expDate').value,paidBy=document.getElementById('expPaidBy').value;
-  const paidFor=Array.from(document.querySelectorAll('#expPaidFor input:checked')).map(c=>c.value);
-  if(!desc){showErr('addErr','Enter a description.');return;}
-  if(!amt||amt<=0){showErr('addErr','Enter a valid amount.');return;}
-  if(!paidFor.length){showErr('addErr','Select who this was paid for.');return;}
-  hideErr('addErr');
-  S.expenses.push({id:uid(),desc,amount:amt,category:cat,date,paidBy,paidFor});
-  navTo('expenses');
-}
-
 function computeSettlements(){
   const bal=getBalances();
   const creds=[],debts=[];
@@ -579,79 +517,284 @@ function computeSettlements(){
   }return txns;
 }
 
+// ── HOME ───────────────────────────────────────────────────────────────────
+function renderHome(){
+  const pg=document.getElementById('page-home');
+  if(!pg)return;
+  if(!STATE.trip){
+    pg.innerHTML=`<div class="empty-state">No trip found. Register to create one.</div>`;
+    return;
+  }
+  const total=STATE.expenses.reduce((s,e)=>s+Number(e.amount),0);
+  const tots=getTotals();const bals=getBalances();
+  const uid=STATE.profile?.id;
+  const myPaid=uid?tots[uid]||0:0;
+  const myBal=uid?bals[uid]||0:0;
+  const maxP=Math.max(...Object.values(tots),1);
+  const bars=STATE.members.map(u=>{
+    const c=colorFor(u.id);const pct=((tots[u.id]||0)/maxP*100).toFixed(1);
+    return`<div class="bar-row">${avHTML(u,'bar-av')}<div class="bar-name">${u.first}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.bg};border:1px solid ${c.fg}30;"></div></div><div class="bar-val">${fmt(tots[u.id]||0)}</div></div>`;
+  }).join('');
+  const recent=STATE.expenses.slice(0,5).map(e=>expRowHTML(e)).join('');
+  pg.innerHTML=`
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Total spent</div><div class="metric-val">${fmt(total)}</div></div>
+      <div class="metric"><div class="metric-label">You paid</div><div class="metric-val">${fmt(myPaid)}</div></div>
+      <div class="metric"><div class="metric-label">Your balance</div><div class="metric-val ${myBal>=0?'green':'red'}">${myBal>=0?'+':'−'}${fmt(myBal)}</div></div>
+      <div class="metric"><div class="metric-label">Expenses</div><div class="metric-val">${STATE.expenses.length}</div></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="section-title">Spending by person</span></div>
+      <div style="padding-bottom:12px;">${bars||'<div class="empty-state">No data yet.</div>'}</div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="section-title">Recent</span><span class="section-more" onclick="navTo('expenses')">See all</span></div>
+      ${recent||'<div class="empty-state">No expenses yet.</div>'}
+    </div>
+    <div class="pb-safe"></div>`;
+}
+
+// ── EXPENSES ───────────────────────────────────────────────────────────────
+function expRowHTML(e){
+  const payer=STATE.profiles[e.paid_by];
+  const cc=CAT_COLORS[e.category]||CAT_COLORS.Other;
+  const ci=CAT_ICONS[e.category]||'ti-dots';
+  return`<div class="exp-row">
+    <div class="exp-icon" style="background:${cc.bg};color:${cc.fg};"><i class="ti ${ci}"></i></div>
+    <div class="exp-body"><div class="exp-desc">${e.description}</div><div class="exp-meta">${e.date} · ${payer?payer.first:'?'} · ${(e.paid_for||[]).length} people</div></div>
+    <div class="exp-amt">${fmt(e.amount)}</div>
+    <button class="del-btn" onclick="delExp('${e.id}')" aria-label="Delete"><i class="ti ti-trash"></i></button>
+  </div>`;
+}
+
+function renderExpenses(cat){
+  const pg=document.getElementById('page-expenses');if(!pg)return;
+  const list=cat==='all'?STATE.expenses:STATE.expenses.filter(e=>e.category===cat);
+  pg.innerHTML=`
+    <div class="filter-row">
+      <div class="fpill ${cat==='all'?'on':''}" onclick="filterExp('all',this)">All</div>
+      <div class="fpill ${cat==='Food'?'on':''}" onclick="filterExp('Food',this)">Food</div>
+      <div class="fpill ${cat==='Transport'?'on':''}" onclick="filterExp('Transport',this)">Transport</div>
+      <div class="fpill ${cat==='Accommodation'?'on':''}" onclick="filterExp('Accommodation',this)">Accommodation</div>
+      <div class="fpill ${cat==='Activities'?'on':''}" onclick="filterExp('Activities',this)">Activities</div>
+      <div class="fpill ${cat==='Other'?'on':''}" onclick="filterExp('Other',this)">Other</div>
+    </div>
+    <div class="section">
+      ${list.length?list.map(e=>expRowHTML(e)).join(''):'<div class="empty-state">No expenses here.</div>'}
+    </div>
+    <div class="pb-safe"></div>`;
+}
+
+function filterExp(cat,el){renderExpenses(cat);}
+
+async function delExp(id){
+  await sb.from('expenses').delete().eq('id',id);
+  STATE.expenses=STATE.expenses.filter(e=>e.id!==id);
+  renderExpenses('all');
+}
+
+// ── ADD EXPENSE ────────────────────────────────────────────────────────────
+function renderAddForm(){
+  const pg=document.getElementById('page-add');if(!pg)return;
+  const today=new Date().toISOString().split('T')[0];
+  const uid=STATE.profile?.id;
+  const memberOpts=STATE.members.map(u=>`<option value="${u.id}" ${u.id===uid?'selected':''}>${u.first} ${u.last}</option>`).join('');
+  const chips=STATE.members.map(u=>`
+    <label class="chip on" id="chip-${u.id}">
+      <input type="checkbox" value="${u.id}" checked onchange="toggleChip('${u.id}',this)" />
+      ${initials(u)} ${u.first}
+    </label>`).join('');
+  pg.innerHTML=`
+    <div class="form-card">
+      <div class="form-field">
+        <label class="form-label">Description</label>
+        <input class="form-input" type="text" id="expDesc" placeholder="e.g. Dinner at Casa Bali" />
+      </div>
+      <div class="form-row-2">
+        <div class="form-field">
+          <label class="form-label">Amount (CAD)</label>
+          <input class="form-input" type="number" id="expAmt" placeholder="0.00" inputmode="decimal" min="0" step="0.01" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" id="expDate" value="${today}" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="expCat">
+          <option>Food</option><option>Transport</option><option>Accommodation</option><option>Activities</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Paid by</label>
+        <select class="form-input" id="expPaidBy">${memberOpts}</select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Paid for</label>
+        <div class="chip-group" id="expPaidFor">${chips}</div>
+      </div>
+      <button class="btn-submit" id="addExpBtn" data-label="Add expense" onclick="addExpense()">Add expense</button>
+      <div class="err" id="addErr" style="text-align:center;margin-top:10px;"></div>
+    </div>
+    <div class="pb-safe"></div>`;
+}
+
+function toggleChip(id,cb){document.getElementById('chip-'+id).classList.toggle('on',cb.checked);}
+
+async function addExpense(){
+  const desc=document.getElementById('expDesc').value.trim();
+  const amt=parseFloat(document.getElementById('expAmt').value);
+  const cat=document.getElementById('expCat').value;
+  const date=document.getElementById('expDate').value;
+  const paidBy=document.getElementById('expPaidBy').value;
+  const paidFor=Array.from(document.querySelectorAll('#expPaidFor input:checked')).map(c=>c.value);
+  if(!desc){showErr('addErr','Enter a description.');return;}
+  if(!amt||amt<=0){showErr('addErr','Enter a valid amount.');return;}
+  if(!paidFor.length){showErr('addErr','Select who this was paid for.');return;}
+  if(!STATE.trip){showErr('addErr','No trip found.');return;}
+  document.getElementById('addExpBtn').disabled=true;
+  const {data:exp,error}=await sb.from('expenses').insert({
+    trip_id:STATE.trip.id,
+    description:desc,
+    amount:amt,
+    category:cat,
+    date,
+    paid_by:paidBy,
+    paid_for:paidFor
+  }).select().single();
+  document.getElementById('addExpBtn').disabled=false;
+  if(error){showErr('addErr',error.message);return;}
+  STATE.expenses.unshift(exp);
+  navTo('expenses');
+}
+
+// ── SETTLE ─────────────────────────────────────────────────────────────────
 function renderSettle(){
-  const total=S.expenses.reduce((s,e)=>s+e.amount,0);
+  const pg=document.getElementById('page-settle');if(!pg)return;
+  const total=STATE.expenses.reduce((s,e)=>s+Number(e.amount),0);
   const bal=getBalances();
-  document.getElementById('settleMetrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Total spent</div><div class="metric-val">${fmt(total)}</div></div>
-    <div class="metric"><div class="metric-label">Members</div><div class="metric-val">${S.users.length}</div></div>`;
-  document.getElementById('balList').innerHTML=S.users.map(u=>{
+  const txns=computeSettlements();
+  const balRows=STATE.members.map(u=>{
     const b=bal[u.id]||0;
     const cls=Math.abs(b)<0.01?'':b>0?'green':'red';
     const label=Math.abs(b)<0.01?'Settled up':b>0?`+${fmt(b)}`:`−${fmt(b)}`;
     return`<div class="settle-row">${avHTML(u)}<div style="flex:1;font-size:15px;font-weight:600;">${u.first} ${u.last}</div><div class="settle-amt ${cls}">${label}</div></div>`;
   }).join('');
-  const txns=computeSettlements();
-  document.getElementById('settleList').innerHTML=txns.length?txns.map(t=>{
-    const fr=S.users.find(u=>u.id===t.from),to=S.users.find(u=>u.id===t.to);
-    return`<div class="settle-row">${avHTML(fr)}<span style="font-size:14px;font-weight:600;">${fr.first}</span><i class="ti ti-arrow-right" style="font-size:18px;color:var(--text2);margin:0 4px;"></i>${avHTML(to)}<span style="font-size:14px;font-weight:600;">${to.first}</span><div class="settle-amt red">${fmt(t.amt)}</div></div>`;
-  }).join(''):`<div style="padding:16px;font-size:14px;color:var(--text2);">Everyone is settled up!</div>`;
+  const txnRows=txns.length?txns.map(t=>{
+    const fr=STATE.profiles[t.from],to=STATE.profiles[t.to];
+    return`<div class="settle-row">${avHTML(fr)}<span style="font-size:14px;font-weight:600;">${fr?fr.first:'?'}</span><i class="ti ti-arrow-right" style="font-size:18px;color:var(--text2);margin:0 4px;"></i>${avHTML(to)}<span style="font-size:14px;font-weight:600;">${to?to.first:'?'}</span><div class="settle-amt red">${fmt(t.amt)}</div></div>`;
+  }).join(''):`<div class="empty-state">Everyone is settled up!</div>`;
+  pg.innerHTML=`
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Total spent</div><div class="metric-val">${fmt(total)}</div></div>
+      <div class="metric"><div class="metric-label">Members</div><div class="metric-val">${STATE.members.length}</div></div>
+    </div>
+    <div class="section"><div class="section-head"><span class="section-title">Balances</span></div>${balRows}</div>
+    <div class="section"><div class="section-head"><span class="section-title">Who pays whom</span></div>${txnRows}</div>
+    <div class="pb-safe"></div>`;
 }
 
+// ── MEMBERS ────────────────────────────────────────────────────────────────
 function renderMembers(){
+  const pg=document.getElementById('page-members');if(!pg)return;
   const tots=getTotals();
-  document.getElementById('memberList').innerHTML=S.users.map(u=>`
-    <div class="member-row">${avHTML(u)}<div class="member-info"><div class="member-name">${u.first} ${u.last}${u.id===S.user.id?' <span style="font-size:11px;color:var(--text2);font-weight:400;">(you)</span>':''}</div><div class="member-email">${u.email}</div></div><div style="font-size:13px;color:var(--text2);flex-shrink:0;">${fmt(tots[u.id]||0)}</div></div>`).join('');
+  const uid=STATE.profile?.id;
+  const rows=STATE.members.map(u=>`
+    <div class="member-row">${avHTML(u)}<div class="member-info"><div class="member-name">${u.first} ${u.last}${u.id===uid?' <span style="font-size:11px;color:var(--text2);font-weight:400;">(you)</span>':''}</div><div class="member-email">${u.email}</div></div><div style="font-size:13px;color:var(--text2);flex-shrink:0;">${fmt(tots[u.id]||0)}</div></div>`).join('');
+  pg.innerHTML=`
+    <div class="section">
+      ${rows}
+      <div class="invite-wrap">
+        <input class="invite-input" type="email" id="inviteEmail" placeholder="friend@example.com" inputmode="email" />
+        <button class="invite-btn" onclick="inviteMember()">Invite</button>
+      </div>
+      <div class="invite-msg" id="inviteMsg"></div>
+    </div>
+    <div class="pb-safe"></div>`;
+}
+
+async function inviteMember(){
+  const email=document.getElementById('inviteEmail').value.trim();
   const msg=document.getElementById('inviteMsg');
-  msg.classList.remove('show');
-  document.getElementById('inviteEmail').value='';
-}
-
-function inviteMember(){
-  const email=v('inviteEmail');const msg=document.getElementById('inviteMsg');
   if(!email||!email.includes('@')){msg.textContent='Enter a valid email.';msg.style.color='var(--red)';msg.classList.add('show');return;}
-  if(S.users.find(u=>u.email===email)){msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');return;}
-  S.users.push({id:uid(),first:email.split('@')[0],last:'',email,avatar:null});
+  // Check if user exists
+  const {data:existing}=await sb.from('profiles').select('*').eq('email',email).single();
+  if(!existing){msg.textContent='No SplitTrip account found for that email. Ask them to register first.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+  if(STATE.members.find(m=>m.id===existing.id)){msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+  await sb.from('trip_members').insert({trip_id:STATE.trip.id,user_id:existing.id});
+  STATE.members.push(existing);
+  STATE.profiles[existing.id]=existing;
   document.getElementById('inviteEmail').value='';
-  msg.textContent='Invite sent! Member added.';msg.style.color='var(--green)';msg.classList.add('show');
-  renderMembers();msg.classList.add('show');
+  msg.textContent='Member added to trip!';msg.style.color='var(--green)';msg.classList.add('show');
+  renderMembers();
 }
 
+// ── PROFILE ────────────────────────────────────────────────────────────────
 function renderProfile(){
-  const u=S.user;const c=colorFor(u.id);
-  const av=document.getElementById('profileAv');
-  if(u.avatar){av.innerHTML=`<img src="${u.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;av.style.background='none';}
-  else{av.textContent=initials(u);av.style.background=c.bg;av.style.color=c.fg;}
-  document.getElementById('profileName').textContent=u.first+' '+u.last;
-  document.getElementById('profileEmailDisp').textContent=u.email;
-  document.getElementById('pfFirst').value=u.first;
-  document.getElementById('pfLast').value=u.last;
-  document.getElementById('saveMsg').classList.remove('show');
+  const pg=document.getElementById('page-profile');if(!pg)return;
+  const p=STATE.profile;if(!p)return;
+  const c=colorFor(p.id);
+  const avStyle=p.avatar_url?'overflow:hidden;':`background:${c.bg};color:${c.fg};`;
+  const avContent=p.avatar_url?`<img src="${p.avatar_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`:`${initials(p)}`;
+  pg.innerHTML=`
+    <div class="section" style="overflow:visible;">
+      <div class="profile-hero">
+        <div class="av-wrap">
+          <div class="av av-lg" id="profileAv" style="${avStyle}">${avContent}</div>
+          <button class="av-edit" onclick="document.getElementById('avUpload').click()" aria-label="Change photo"><i class="ti ti-pencil"></i></button>
+          <input type="file" id="avUpload" accept="image/*" class="hidden" onchange="uploadAvatar(event)" />
+        </div>
+        <div class="profile-name">${p.first} ${p.last}</div>
+        <div class="profile-email-disp">${p.email}</div>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <div class="form-row-2" style="margin-bottom:12px;">
+          <div class="form-field"><label class="form-label">First name</label><input class="form-input" type="text" id="pfFirst" value="${p.first}" /></div>
+          <div class="form-field"><label class="form-label">Last name</label><input class="form-input" type="text" id="pfLast" value="${p.last}" /></div>
+        </div>
+        <button class="btn-submit" onclick="saveProfile()">Save changes</button>
+        <div class="save-msg" id="saveMsg">Profile updated ✓</div>
+        <button class="btn-danger" onclick="logout()"><i class="ti ti-logout"></i> Sign out</button>
+      </div>
+    </div>
+    <div class="pb-safe"></div>`;
 }
 
-function uploadAvatar(ev){
+async function uploadAvatar(ev){
   const file=ev.target.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    S.user.avatar=e.target.result;
-    const idx=S.users.findIndex(u=>u.id===S.user.id);
-    if(idx>=0)S.users[idx].avatar=e.target.result;
-    renderProfile();refreshTopbar();
-  };
-  r.readAsDataURL(file);
-}
-
-function saveProfile(){
-  const f=v('pfFirst'),l=v('pfLast');if(!f)return;
-  S.user.first=f;S.user.last=l;
-  const idx=S.users.findIndex(u=>u.id===S.user.id);
-  if(idx>=0){S.users[idx].first=f;S.users[idx].last=l;}
+  const uid=STATE.profile.id;
+  const ext=file.name.split('.').pop();
+  const path=`${uid}/avatar.${ext}`;
+  const {error}=await sb.storage.from('avatars').upload(path,file,{upsert:true});
+  if(error){alert('Upload failed: '+error.message);return;}
+  const {data}=sb.storage.from('avatars').getPublicUrl(path);
+  const url=data.publicUrl+'?t='+Date.now();
+  await sb.from('profiles').update({avatar_url:url}).eq('id',uid);
+  STATE.profile.avatar_url=url;
+  if(STATE.profiles[uid])STATE.profiles[uid].avatar_url=url;
   renderProfile();refreshTopbar();
-  document.getElementById('saveMsg').classList.add('show');
-  setTimeout(()=>document.getElementById('saveMsg').classList.remove('show'),2500);
 }
 
-showLogin();
+async function saveProfile(){
+  const first=document.getElementById('pfFirst').value.trim();
+  const last=document.getElementById('pfLast').value.trim();
+  if(!first)return;
+  const uid=STATE.profile.id;
+  await sb.from('profiles').update({first,last}).eq('id',uid);
+  STATE.profile.first=first;STATE.profile.last=last;
+  if(STATE.profiles[uid]){STATE.profiles[uid].first=first;STATE.profiles[uid].last=last;}
+  renderProfile();refreshTopbar();
+  const msg=document.getElementById('saveMsg');
+  if(msg){msg.classList.add('show');setTimeout(()=>msg.classList.remove('show'),2500);}
+}
+
+async function logout(){
+  await sb.auth.signOut();
+}
+
+// ── START ──────────────────────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
