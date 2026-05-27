@@ -867,7 +867,207 @@ function renderProfile(){
         <button class="btn-danger" onclick="logout()"><i class="ti ti-logout"></i> Sign out</button>
       </div>
     </div>
+
+    <div style="padding:0 0 4px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px;">
+        <div style="font-size:16px;font-weight:700;">My trips</div>
+        <button class="btn-sm-primary" onclick="showNewTripModal()"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>New trip</button>
+      </div>
+      <div id="myTripsList"></div>
+    </div>
+
+    <div class="hidden" id="newTripModal">
+      <div class="section">
+        <div style="padding:14px 16px 0;font-size:15px;font-weight:700;">Create new trip</div>
+        <div style="padding:12px 16px 16px;">
+          <div class="form-field">
+            <label class="form-label">Trip name</label>
+            <input class="form-input" type="text" id="newTripNameInput" placeholder="e.g. Tokyo 2027" />
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-sm" onclick="hideNewTripModal()" style="flex:1;">Cancel</button>
+            <button class="btn-sm-primary" onclick="createNewTrip()" style="flex:2;">Create trip</button>
+          </div>
+          <div class="err" id="newTripErr" style="text-align:center;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hidden" id="manageTripPanel">
+      <div class="section">
+        <div style="padding:14px 16px 0;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:15px;font-weight:700;" id="manageTripName"></div>
+          <button class="btn-sm" onclick="hideTripPanel()">Done</button>
+        </div>
+        <div class="tab-row" style="margin:12px 0 0;">
+          <div class="tab-item active" onclick="switchTripTab('members',this)">Members</div>
+          <div class="tab-item" onclick="switchTripTab('invite',this)">Invite</div>
+        </div>
+        <div id="tripTabMembers" style="padding:0 0 8px;">
+          <div id="tripMembersList"></div>
+        </div>
+        <div id="tripTabInvite" class="hidden" style="padding:0 16px 16px;">
+          <div class="search-wrap">
+            <i class="ti ti-search search-icon" aria-hidden="true"></i>
+            <input class="search-input" type="text" id="memberSearchInput" placeholder="Search by name or email…" oninput="searchMembers(this.value)" />
+          </div>
+          <div id="memberSearchResults"></div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">Or invite by email</div>
+            <div style="display:flex;gap:8px;">
+              <input class="invite-input" type="email" id="panelInviteEmail" placeholder="friend@example.com" inputmode="email" style="flex:1;font-size:14px;" />
+              <button class="invite-btn" onclick="panelInviteMember()" style="font-size:14px;">Send</button>
+            </div>
+            <div class="invite-msg" id="panelInviteMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="pb-safe"></div>`;
+  loadMyTrips();
+}
+
+let ALL_PROFILES=[];
+let ACTIVE_MANAGE_TRIP=null;
+
+async function loadMyTrips(){
+  const uid=STATE.profile.id;
+  const {data:memberships}=await sb.from('trip_members').select('trip_id, trips(*)').eq('user_id',uid);
+  const el=document.getElementById('myTripsList');
+  if(!el)return;
+  if(!memberships||!memberships.length){el.innerHTML='<div class="empty-state">No trips yet.</div>';return;}
+  el.innerHTML=memberships.map(m=>{
+    const t=m.trips;if(!t)return'';
+    const isActive=STATE.trip&&STATE.trip.id===t.id;
+    return`<div class="trip-card">
+      <div class="trip-card-head" onclick="manageTrip('${t.id}','${t.name.replace(/'/g,"\'")}')">
+        <div>
+          <div class="trip-card-name">${t.name}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${isActive?'<span class="trip-active-badge">Active</span>':'<button class="btn-sm" onclick="event.stopPropagation();switchTrip(''+t.id+'')">Switch</button>'}
+          <i class="ti ti-chevron-right" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function switchTrip(tripId){
+  const {data:trip}=await sb.from('trips').select('*').eq('id',tripId).single();
+  if(trip){STATE.trip=trip;await loadTripData();refreshTopbar();renderProfile();navTo('home');}
+}
+
+function showNewTripModal(){
+  show('newTripModal');
+  const el=document.getElementById('newTripNameInput');
+  if(el){el.value='';el.focus();}
+}
+function hideNewTripModal(){hide('newTripModal');}
+
+async function createNewTrip(){
+  const name=document.getElementById('newTripNameInput').value.trim();
+  if(!name){showErr('newTripErr','Enter a trip name.');return;}
+  const uid=STATE.profile.id;
+  const {data:trip,error}=await sb.from('trips').insert({name,created_by:uid}).select().single();
+  if(error){showErr('newTripErr',error.message);return;}
+  await sb.from('trip_members').insert({trip_id:trip.id,user_id:uid});
+  STATE.trip=trip;
+  await loadTripData();
+  hideNewTripModal();
+  refreshTopbar();
+  loadMyTrips();
+}
+
+async function manageTrip(tripId,tripName){
+  ACTIVE_MANAGE_TRIP=tripId;
+  show('manageTripPanel');
+  document.getElementById('manageTripName').textContent=tripName;
+  // Load members for this trip
+  const {data:members}=await sb.from('trip_members').select('user_id, profiles(*)').eq('trip_id',tripId);
+  const el=document.getElementById('tripMembersList');
+  if(el&&members){
+    el.innerHTML=members.map(m=>{
+      const p=m.profiles;if(!p)return'';
+      const c=colorFor(p.id);
+      const av=p.avatar_url?`<img src="${p.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`:'';
+      return`<div class="member-row">
+        <div class="av" style="${p.avatar_url?'overflow:hidden;':`background:${c.bg};color:${c.fg};`}">${p.avatar_url?av:initials(p)}</div>
+        <div class="member-info"><div class="member-name">${p.first} ${p.last}</div><div class="member-email">${p.email}</div></div>
+      </div>`;
+    }).join('');
+  }
+  // Pre-load all profiles for search
+  const {data:allP}=await sb.from('profiles').select('*').order('first');
+  ALL_PROFILES=allP||[];
+}
+
+function hideTripPanel(){hide('manageTripPanel');ACTIVE_MANAGE_TRIP=null;}
+
+function switchTripTab(tab,el){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(tab==='members'){show('tripTabMembers');hide('tripTabInvite');}
+  else{hide('tripTabMembers');show('tripTabInvite');}
+}
+
+function searchMembers(query){
+  const res=document.getElementById('memberSearchResults');
+  if(!res)return;
+  if(!query||query.length<2){res.innerHTML='';return;}
+  const q=query.toLowerCase();
+  const matches=ALL_PROFILES.filter(p=>{
+    const full=(p.first+' '+p.last).toLowerCase();
+    return full.includes(q)||p.email.toLowerCase().includes(q);
+  }).slice(0,8);
+  if(!matches.length){res.innerHTML='<div style="padding:10px 14px;font-size:14px;color:var(--text2);">No users found.</div>';return;}
+  res.innerHTML='<div class="search-results">'+matches.map(p=>{
+    const c=colorFor(p.id);
+    const av=p.avatar_url?`<img src="${p.avatar_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />`:'';
+    return`<div class="search-result-row" onclick="addMemberFromSearch('${p.id}')">
+      <div class="av av-sm" style="${p.avatar_url?'overflow:hidden;':`background:${c.bg};color:${c.fg};`}">${p.avatar_url?av:initials(p)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">${p.first} ${p.last}</div>
+        <div style="font-size:12px;color:var(--text2);">${p.email}</div>
+      </div>
+      <i class="ti ti-user-plus" style="color:var(--text2);font-size:18px;" aria-hidden="true"></i>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+async function addMemberFromSearch(userId){
+  if(!ACTIVE_MANAGE_TRIP)return;
+  const {data:existing}=await sb.from('trip_members').select('*').eq('trip_id',ACTIVE_MANAGE_TRIP).eq('user_id',userId).single();
+  if(existing){alert('Already a member of this trip.');return;}
+  await sb.from('trip_members').insert({trip_id:ACTIVE_MANAGE_TRIP,user_id:userId});
+  document.getElementById('memberSearchInput').value='';
+  document.getElementById('memberSearchResults').innerHTML='';
+  if(STATE.trip&&STATE.trip.id===ACTIVE_MANAGE_TRIP)await loadTripData();
+  manageTrip(ACTIVE_MANAGE_TRIP,document.getElementById('manageTripName').textContent);
+}
+
+async function panelInviteMember(){
+  if(!ACTIVE_MANAGE_TRIP)return;
+  const email=document.getElementById('panelInviteEmail').value.trim();
+  const msg=document.getElementById('panelInviteMsg');
+  if(!email||!email.includes('@')){msg.textContent='Enter a valid email.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+  const {data:existing}=await sb.from('profiles').select('*').eq('email',email).single();
+  if(existing){
+    const {data:already}=await sb.from('trip_members').select('*').eq('trip_id',ACTIVE_MANAGE_TRIP).eq('user_id',existing.id).single();
+    if(already){msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+    await sb.from('trip_members').insert({trip_id:ACTIVE_MANAGE_TRIP,user_id:existing.id});
+    msg.textContent=existing.first+' added!';msg.style.color='var(--green)';msg.classList.add('show');
+    if(STATE.trip&&STATE.trip.id===ACTIVE_MANAGE_TRIP)await loadTripData();
+    manageTrip(ACTIVE_MANAGE_TRIP,document.getElementById('manageTripName').textContent);
+  } else {
+    const tripName=document.getElementById('manageTripName').textContent;
+    const redirectTo=window.location.origin+'?trip='+encodeURIComponent(ACTIVE_MANAGE_TRIP)+'&tripname='+encodeURIComponent(tripName);
+    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirectTo}});
+    if(error){msg.textContent='Error: '+error.message;msg.style.color='var(--red)';msg.classList.add('show');return;}
+    document.getElementById('panelInviteEmail').value='';
+    msg.textContent='Invite sent to '+email;msg.style.color='var(--green)';msg.classList.add('show');
+  }
 }
 
 async function uploadAvatar(ev){
