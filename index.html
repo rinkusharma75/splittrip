@@ -1,157 +1,182 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<title>SplitTrip</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font-sans,system-ui);background:var(--color-background-tertiary);color:var(--color-text-primary);}
-.phone{width:380px;min-height:700px;background:var(--color-background-tertiary);margin:0 auto;display:flex;flex-direction:column;position:relative;}
-
-/* AUTH */
-.auth-screen{padding:2rem 1.25rem;display:flex;flex-direction:column;min-height:700px;}
-.auth-hero{text-align:center;padding:2.5rem 0 2rem;}
-.auth-icon{width:60px;height:60px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px;}
-.auth-title{font-size:22px;font-weight:500;margin-bottom:6px;}
-.auth-sub{font-size:14px;color:var(--color-text-secondary);line-height:1.5;}
-.auth-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;padding:1.5rem;}
-.field{margin-bottom:1rem;}
-.field label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;font-weight:500;letter-spacing:.3px;}
-.field input{width:100%;padding:13px 14px;border:0.5px solid var(--color-border-secondary);border-radius:10px;font-size:16px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;-webkit-appearance:none;}
-.field input:focus{border-color:var(--color-border-primary);box-shadow:0 0 0 3px rgba(120,120,120,.1);}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.btn-main{width:100%;padding:15px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer;margin-top:.5rem;}
-.btn-main:active{opacity:.85;}
-.auth-link{text-align:center;margin-top:1rem;font-size:14px;color:var(--color-text-secondary);}
-.auth-link span{color:var(--color-text-primary);font-weight:500;cursor:pointer;}
-.otp-banner{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:13px;color:var(--color-text-secondary);line-height:1.5;}
-.otp-code{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);margin-top:4px;}
-.err{font-size:12px;color:var(--color-text-danger);margin-top:5px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:16px;}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f0;--bg3:#ebebeb;
+  --text:#1a1a1a;--text2:#6b6b6b;--text3:#9b9b9b;
+  --border:#e0e0e0;--border2:#d0d0d0;
+  --radius:12px;--radius-lg:16px;--radius-xl:20px;
+  --green:#1D9E75;--red:#D85A30;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+    --text:#f2f2f7;--text2:#aeaeb2;--text3:#6d6d70;
+    --border:#3a3a3c;--border2:#48484a;
+  }
+}
 
 /* APP SHELL */
-.app-shell{display:flex;flex-direction:column;min-height:700px;background:var(--color-background-tertiary);}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;background:var(--bg2);}
 
-/* TOP BAR */
-.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:14px 16px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
-.topbar-title{font-size:17px;font-weight:500;flex:1;}
-.topbar-trip{font-size:11px;color:var(--color-text-secondary);}
-.topbar-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;overflow:hidden;}
-.topbar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+/* AUTH */
+.auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow-y:auto;}
+.auth-hero{text-align:center;padding:32px 0 28px;}
+.auth-icon{width:72px;height:72px;background:var(--bg);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
+.auth-title{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+.auth-sub{font-size:15px;color:var(--text2);line-height:1.5;}
+.auth-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;}
+.field{margin-bottom:16px;}
+.field:last-of-type{margin-bottom:0;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase;}
+.field input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
+.field input:focus{border-color:var(--text);background:var(--bg);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-main{width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:17px;font-weight:600;cursor:pointer;margin-top:16px;letter-spacing:-.2px;}
+.btn-main:active{opacity:.8;transform:scale(.99);}
+.auth-link{text-align:center;margin-top:16px;font-size:15px;color:var(--text2);}
+.auth-link span{color:var(--text);font-weight:600;cursor:pointer;}
+.otp-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:14px;color:var(--text2);line-height:1.5;}
+.otp-code{font-family:monospace;font-size:12px;color:var(--text3);margin-top:4px;}
+.err{font-size:13px;color:var(--red);margin-top:6px;display:none;}
+.err.show{display:block;}
 
-/* SCROLL CONTENT */
-.scroll-area{flex:1;overflow-y:auto;padding:0 0 100px;}
-.page{padding:16px;}
+/* MAIN SHELL */
+.shell{flex:1;display:flex;flex-direction:column;min-height:0;}
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.topbar-titles{flex:1;min-width:0;}
+.topbar-title{font-size:18px;font-weight:700;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-trip{font-size:12px;color:var(--text2);margin-top:1px;}
+.topbar-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer;}
+.topbar-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page{padding:16px;display:none;}
+.page.active{display:block;}
 
 /* BOTTOM NAV */
-.bottom-nav{background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;padding:8px 0 4px;position:sticky;bottom:0;}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;cursor:pointer;color:var(--color-text-secondary);border:none;background:none;-webkit-tap-highlight-color:transparent;}
-.nav-btn.active{color:var(--color-text-primary);}
-.nav-btn i{font-size:22px;}
-.nav-btn span{font-size:10px;font-weight:500;}
-.nav-btn-add{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 4px;cursor:pointer;border:none;background:none;}
-.add-circle{width:48px;height:48px;background:var(--color-text-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;}
-.add-circle i{font-size:22px;color:var(--color-background-primary);}
-.add-label{font-size:10px;font-weight:500;color:var(--color-text-secondary);margin-top:2px;}
+.bnav{background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom);flex-shrink:0;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 6px;cursor:pointer;color:var(--text2);border:none;background:none;font-size:10px;font-weight:500;}
+.bnav-btn.active{color:var(--text);}
+.bnav-btn i{font-size:24px;}
+.bnav-add{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 4px 6px;cursor:pointer;border:none;background:none;font-size:10px;font-weight:500;color:var(--text2);}
+.add-circle{width:52px;height:52px;background:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-14px;}
+.add-circle i{font-size:26px;color:var(--bg);}
 
-/* METRIC CARDS */
+/* METRICS */
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.metric{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px 14px 12px;}
-.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;font-weight:500;}
-.metric-val{font-size:20px;font-weight:500;}
-.positive{color:#1D9E75;}
-.negative{color:#D85A30;}
+.metric{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
+.metric-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
+.metric-val{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.green{color:var(--green);}
+.red{color:var(--red);}
 
-/* SECTION */
-.section{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+/* SECTION CARD */
+.section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;}
 .section-head{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;}
-.section-title{font-size:14px;font-weight:500;}
-.section-more{font-size:12px;color:var(--color-text-secondary);cursor:pointer;}
+.section-title{font-size:15px;font-weight:700;}
+.section-more{font-size:13px;color:var(--text2);cursor:pointer;}
 
 /* EXPENSE ROW */
-.exp-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:0.5px solid var(--color-border-tertiary);}
-.exp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.exp-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);}
+.exp-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .exp-body{flex:1;min-width:0;}
-.exp-desc{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.exp-meta{font-size:12px;color:var(--color-text-secondary);margin-top:1px;}
-.exp-amt{font-size:15px;font-weight:500;flex-shrink:0;}
-.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.exp-desc{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-meta{font-size:12px;color:var(--text2);margin-top:2px;}
+.exp-amt{font-size:16px;font-weight:700;flex-shrink:0;}
+.del-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);border-radius:10px;background:none;cursor:pointer;color:var(--red);flex-shrink:0;font-size:16px;}
 
-/* BAR */
+/* BAR CHART */
 .bar-row{display:flex;align-items:center;gap:10px;padding:8px 16px;}
-.bar-row:first-child{padding-top:4px;}
-.bar-name{font-size:13px;width:56px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bar-track{flex:1;height:6px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;}
-.bar-val{font-size:12px;font-weight:500;min-width:48px;text-align:right;flex-shrink:0;}
+.bar-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;overflow:hidden;}
+.bar-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.bar-name{font-size:13px;font-weight:500;width:52px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-track{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.bar-val{font-size:12px;font-weight:600;min-width:52px;text-align:right;flex-shrink:0;}
 
 /* AVATAR */
-.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;overflow:hidden;}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden;}
 .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .av-sm{width:28px;height:28px;font-size:11px;}
-.av-lg{width:72px;height:72px;font-size:24px;}
+.av-lg{width:80px;height:80px;font-size:28px;}
 
-/* SETTLE ROW */
-.settle-row{display:flex;align-items:center;gap:10px;padding:11px 16px;border-top:0.5px solid var(--color-border-tertiary);}
-.settle-amt{font-size:14px;font-weight:500;margin-left:auto;flex-shrink:0;}
+/* SETTLE */
+.settle-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
+.settle-amt{font-size:15px;font-weight:700;margin-left:auto;flex-shrink:0;}
 
 /* MEMBER ROW */
-.member-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:0.5px solid var(--color-border-tertiary);}
+.member-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);}
 .member-info{flex:1;min-width:0;}
-.member-name{font-size:14px;font-weight:500;}
-.member-email{font-size:12px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.member-name{font-size:15px;font-weight:600;}
+.member-email{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* ADD FORM */
-.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;padding:16px;margin-bottom:12px;}
-.form-field{margin-bottom:14px;}
-.form-label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;font-weight:500;}
-.form-input{width:100%;padding:13px 14px;border:0.5px solid var(--color-border-secondary);border-radius:10px;font-size:16px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;-webkit-appearance:none;}
-.form-input:focus{border-color:var(--color-border-primary);}
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
-.chip{display:flex;align-items:center;gap:6px;padding:8px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.chip.on{background:var(--color-background-secondary);border-color:var(--color-border-primary);font-weight:500;}
+/* FORM */
+.form-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;}
+.form-field{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px;}
+.form-input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;appearance:none;}
+.form-input:focus{border-color:var(--text);background:var(--bg);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:20px;font-size:14px;font-weight:500;cursor:pointer;background:var(--bg2);}
+.chip.on{background:var(--text);color:var(--bg);border-color:var(--text);}
 .chip input{display:none;}
-.btn-submit{width:100%;padding:15px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer;margin-top:4px;}
-.btn-submit:active{opacity:.85;}
+.btn-submit{width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:17px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-submit:active{opacity:.8;}
 
-/* PROFILE */
-.profile-hero{text-align:center;padding:1.5rem 1rem 1rem;}
-.profile-av-wrap{position:relative;display:inline-block;margin-bottom:12px;}
-.av-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--color-text-primary);color:var(--color-background-primary);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
-.profile-name{font-size:18px;font-weight:500;}
-.profile-email{font-size:13px;color:var(--color-text-secondary);margin-top:3px;}
-.btn-outline{width:100%;padding:13px;background:transparent;color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:12px;font-size:15px;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-outline:active{background:var(--color-background-secondary);}
-.btn-danger-outline{width:100%;padding:13px;background:transparent;color:var(--color-text-danger);border:0.5px solid var(--color-border-danger);border-radius:12px;font-size:15px;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.save-msg{font-size:13px;color:#1D9E75;text-align:center;margin-top:8px;}
-
-/* FILTER PILLS */
+/* FILTER */
 .filter-row{display:flex;gap:8px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none;}
 .filter-row::-webkit-scrollbar{display:none;}
-.fpill{padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:13px;white-space:nowrap;cursor:pointer;flex-shrink:0;background:var(--color-background-primary);}
-.fpill.on{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary);}
+.fpill{padding:8px 16px;border:1px solid var(--border);border-radius:20px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;flex-shrink:0;background:var(--bg);}
+.fpill.on{background:var(--text);color:var(--bg);border-color:var(--text);}
 
 /* INVITE */
-.invite-row{display:flex;gap:8px;padding:12px 16px;border-top:0.5px solid var(--color-border-tertiary);}
-.invite-input{flex:1;padding:11px 12px;border:0.5px solid var(--color-border-secondary);border-radius:10px;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;}
-.invite-btn{padding:11px 14px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:10px;font-size:14px;cursor:pointer;white-space:nowrap;}
+.invite-wrap{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
+.invite-input{flex:1;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:15px;background:var(--bg2);color:var(--text);outline:none;}
+.invite-btn{padding:12px 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;}
 
+/* PROFILE */
+.profile-hero{text-align:center;padding:24px 16px 16px;}
+.av-wrap{position:relative;display:inline-block;margin-bottom:14px;}
+.av-edit{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--text);color:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.profile-name{font-size:20px;font-weight:700;letter-spacing:-.3px;}
+.profile-email-disp{font-size:14px;color:var(--text2);margin-top:4px;}
+.btn-outline{width:100%;padding:14px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.btn-danger{width:100%;padding:14px;background:transparent;color:var(--red);border:1px solid rgba(216,90,48,.3);border-radius:var(--radius);font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.save-msg{font-size:14px;color:var(--green);text-align:center;margin-top:10px;display:none;}
+.save-msg.show{display:block;}
+.pb-safe{height:env(safe-area-inset-bottom);height:24px;}
 .hidden{display:none!important;}
-.del-btn{padding:6px 10px;background:transparent;color:var(--color-text-danger);border:0.5px solid var(--color-border-danger);border-radius:8px;font-size:12px;cursor:pointer;flex-shrink:0;}
-.back-btn{padding:6px 10px;background:transparent;border:none;color:var(--color-text-secondary);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.invite-msg{font-size:13px;padding:6px 16px 10px;display:none;}
+.invite-msg.show{display:block;}
 </style>
-
-<div class="phone" id="app">
+</head>
+<body>
+<div id="app">
 
 <!-- AUTH -->
-<div class="auth-screen" id="authScreen">
-  <div class="auth-hero">
-    <div class="auth-icon">✈</div>
-    <div class="auth-title">SplitTrip</div>
-    <div class="auth-sub">Track and split travel expenses with your group.</div>
-  </div>
-
+<div class="auth-wrap" id="authScreen">
   <div id="loginForm">
+    <div class="auth-hero">
+      <div class="auth-icon">✈</div>
+      <div class="auth-title">SplitTrip</div>
+      <div class="auth-sub">Track and split travel expenses with your crew.</div>
+    </div>
     <div class="auth-card">
       <div class="field">
         <label>Email address</label>
-        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
       </div>
       <button class="btn-main" onclick="sendOtp()">Send OTP</button>
     </div>
@@ -159,12 +184,17 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
   </div>
 
   <div id="otpForm" class="hidden">
+    <div class="auth-hero">
+      <div class="auth-icon">📧</div>
+      <div class="auth-title">Check your email</div>
+      <div class="auth-sub">We sent a 6-digit code to verify your identity.</div>
+    </div>
     <div class="auth-card">
       <div class="otp-banner">Code sent to <strong id="otpEmailLabel"></strong><div class="otp-code" id="otpCodeHint"></div></div>
       <div class="field">
-        <label>6-digit OTP</label>
-        <input type="number" id="otpInput" placeholder="000000" maxlength="6" inputmode="numeric" />
-        <div class="err hidden" id="otpErr">Invalid code. Try again.</div>
+        <label>6-digit code</label>
+        <input type="tel" id="otpInput" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+        <div class="err" id="otpErr">Invalid code — try again.</div>
       </div>
       <button class="btn-main" onclick="verifyOtp()">Verify & sign in</button>
     </div>
@@ -172,6 +202,11 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
   </div>
 
   <div id="registerForm" class="hidden">
+    <div class="auth-hero">
+      <div class="auth-icon">👋</div>
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Set up your profile and start your first trip.</div>
+    </div>
     <div class="auth-card">
       <div class="field field-row">
         <div><label>First name</label><input type="text" id="regFirst" placeholder="Jane" autocomplete="given-name" /></div>
@@ -179,7 +214,7 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
       </div>
       <div class="field">
         <label>Email</label>
-        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" />
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" inputmode="email" />
       </div>
       <div class="field">
         <label>Trip name</label>
@@ -192,31 +227,31 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
 </div>
 
 <!-- MAIN APP -->
-<div class="app-shell hidden" id="mainApp">
+<div class="shell hidden" id="mainApp">
   <div class="topbar">
-    <div style="flex:1">
+    <div class="topbar-titles">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <div class="topbar-trip" id="topbarTrip"></div>
     </div>
-    <div class="topbar-avatar" id="topbarAvatar" onclick="goProfile()" style="cursor:pointer;"></div>
+    <div class="topbar-av" id="topbarAv" onclick="navTo('profile')"></div>
   </div>
 
-  <div class="scroll-area" id="scrollArea">
-    <!-- DASHBOARD -->
-    <div class="page hidden" id="page-home">
+  <div class="scroll" id="scrollArea">
+
+    <div class="page active" id="page-home">
       <div class="metrics" id="metricGrid"></div>
       <div class="section">
         <div class="section-head"><span class="section-title">Spending by person</span></div>
-        <div id="spendBars" style="padding-bottom:10px;"></div>
+        <div id="spendBars" style="padding-bottom:12px;"></div>
       </div>
       <div class="section">
         <div class="section-head"><span class="section-title">Recent</span><span class="section-more" onclick="navTo('expenses')">See all</span></div>
         <div id="recentList"></div>
       </div>
+      <div class="pb-safe"></div>
     </div>
 
-    <!-- EXPENSES -->
-    <div class="page hidden" id="page-expenses">
+    <div class="page" id="page-expenses">
       <div class="filter-row" id="filterRow">
         <div class="fpill on" onclick="filterExp('all',this)">All</div>
         <div class="fpill" onclick="filterExp('Food',this)">Food</div>
@@ -226,10 +261,10 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
         <div class="fpill" onclick="filterExp('Other',this)">Other</div>
       </div>
       <div class="section"><div id="expList"></div></div>
+      <div class="pb-safe"></div>
     </div>
 
-    <!-- ADD -->
-    <div class="page hidden" id="page-add">
+    <div class="page" id="page-add">
       <div class="form-card">
         <div class="form-field">
           <label class="form-label">Description</label>
@@ -238,7 +273,7 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
         <div class="form-row-2">
           <div class="form-field">
             <label class="form-label">Amount (CAD)</label>
-            <input class="form-input" type="number" id="expAmt" placeholder="0.00" inputmode="decimal" />
+            <input class="form-input" type="number" id="expAmt" placeholder="0.00" inputmode="decimal" min="0" step="0.01" />
           </div>
           <div class="form-field">
             <label class="form-label">Date</label>
@@ -257,88 +292,83 @@ body{font-family:var(--font-sans,system-ui);background:var(--color-background-te
         </div>
         <div class="form-field">
           <label class="form-label">Paid for</label>
-          <div class="check-group" id="expPaidFor"></div>
+          <div class="chip-group" id="expPaidFor"></div>
         </div>
         <button class="btn-submit" onclick="addExpense()">Add expense</button>
-        <div class="err hidden" id="addErr" style="text-align:center;margin-top:8px;"></div>
+        <div class="err" id="addErr" style="text-align:center;margin-top:10px;"></div>
       </div>
+      <div class="pb-safe"></div>
     </div>
 
-    <!-- SETTLE -->
-    <div class="page hidden" id="page-settle">
+    <div class="page" id="page-settle">
       <div class="metrics" id="settleMetrics"></div>
       <div class="section">
         <div class="section-head"><span class="section-title">Balances</span></div>
         <div id="balList"></div>
       </div>
       <div class="section">
-        <div class="section-head"><span class="section-title">Payments to make</span></div>
+        <div class="section-head"><span class="section-title">Who pays whom</span></div>
         <div id="settleList"></div>
       </div>
+      <div class="pb-safe"></div>
     </div>
 
-    <!-- MEMBERS -->
-    <div class="page hidden" id="page-members">
+    <div class="page" id="page-members">
       <div class="section">
         <div id="memberList"></div>
-        <div class="invite-row">
-          <input class="invite-input" type="email" id="inviteEmail" placeholder="friend@example.com" />
+        <div class="invite-wrap">
+          <input class="invite-input" type="email" id="inviteEmail" placeholder="friend@example.com" inputmode="email" />
           <button class="invite-btn" onclick="inviteMember()">Invite</button>
         </div>
-        <div class="err hidden" id="inviteMsg" style="padding:6px 16px 10px;"></div>
+        <div class="invite-msg" id="inviteMsg"></div>
       </div>
+      <div class="pb-safe"></div>
     </div>
 
-    <!-- PROFILE -->
-    <div class="page hidden" id="page-profile">
+    <div class="page" id="page-profile">
       <div class="section" style="overflow:visible;">
         <div class="profile-hero">
-          <div class="profile-av-wrap">
+          <div class="av-wrap">
             <div class="av av-lg" id="profileAv"></div>
-            <button class="av-edit" onclick="document.getElementById('avUpload').click()" aria-label="Change photo"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+            <button class="av-edit" onclick="document.getElementById('avUpload').click()" aria-label="Change photo"><i class="ti ti-pencil"></i></button>
             <input type="file" id="avUpload" accept="image/*" class="hidden" onchange="uploadAvatar(event)" />
           </div>
           <div class="profile-name" id="profileName"></div>
-          <div class="profile-email" id="profileEmailDisp"></div>
+          <div class="profile-email-disp" id="profileEmailDisp"></div>
         </div>
         <div style="padding:0 16px 16px;">
-          <div class="form-row-2" style="margin-bottom:10px;">
-            <div class="form-field">
-              <label class="form-label">First name</label>
-              <input class="form-input" type="text" id="pfFirst" />
-            </div>
-            <div class="form-field">
-              <label class="form-label">Last name</label>
-              <input class="form-input" type="text" id="pfLast" />
-            </div>
+          <div class="form-row-2" style="margin-bottom:12px;">
+            <div class="form-field"><label class="form-label">First name</label><input class="form-input" type="text" id="pfFirst" /></div>
+            <div class="form-field"><label class="form-label">Last name</label><input class="form-input" type="text" id="pfLast" /></div>
           </div>
           <button class="btn-submit" onclick="saveProfile()">Save changes</button>
-          <div class="save-msg hidden" id="saveMsg">Profile updated.</div>
-          <button class="btn-danger-outline" onclick="logout()" style="margin-top:12px;"><i class="ti ti-logout" aria-hidden="true"></i> Sign out</button>
+          <div class="save-msg" id="saveMsg">Profile updated ✓</div>
+          <button class="btn-danger" onclick="logout()"><i class="ti ti-logout"></i> Sign out</button>
         </div>
       </div>
+      <div class="pb-safe"></div>
     </div>
+
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <button class="nav-btn active" id="nb-home" onclick="navTo('home')" aria-label="Dashboard"><i class="ti ti-layout-dashboard"></i><span>Home</span></button>
-    <button class="nav-btn" id="nb-expenses" onclick="navTo('expenses')" aria-label="Expenses"><i class="ti ti-receipt"></i><span>Expenses</span></button>
-    <button class="nav-btn-add" onclick="navTo('add')" aria-label="Add expense">
-      <div class="add-circle"><i class="ti ti-plus" aria-hidden="true"></i></div>
-      <div class="add-label">Add</div>
+  <div class="bnav">
+    <button class="bnav-btn active" id="nb-home" onclick="navTo('home')" aria-label="Home"><i class="ti ti-layout-dashboard"></i>Home</button>
+    <button class="bnav-btn" id="nb-expenses" onclick="navTo('expenses')" aria-label="Expenses"><i class="ti ti-receipt"></i>Expenses</button>
+    <button class="bnav-add" onclick="navTo('add')" aria-label="Add">
+      <div class="add-circle"><i class="ti ti-plus"></i></div>
+      <span style="font-size:10px;font-weight:500;color:var(--text2);margin-top:2px;">Add</span>
     </button>
-    <button class="nav-btn" id="nb-settle" onclick="navTo('settle')" aria-label="Settlement"><i class="ti ti-arrows-exchange"></i><span>Settle</span></button>
-    <button class="nav-btn" id="nb-members" onclick="navTo('members')" aria-label="Members"><i class="ti ti-users"></i><span>Members</span></button>
+    <button class="bnav-btn" id="nb-settle" onclick="navTo('settle')" aria-label="Settle"><i class="ti ti-arrows-exchange"></i>Settle</button>
+    <button class="bnav-btn" id="nb-members" onclick="navTo('members')" aria-label="Members"><i class="ti ti-users"></i>Members</button>
   </div>
 </div>
 
 </div>
-
 <script>
 const COLORS=[{bg:'#E6F1FB',fg:'#0C447C'},{bg:'#E1F5EE',fg:'#085041'},{bg:'#FAEEDA',fg:'#633806'},{bg:'#FBEAF0',fg:'#72243E'},{bg:'#EEEDFE',fg:'#3C3489'},{bg:'#FAECE7',fg:'#993C1D'}];
 const CAT_COLORS={Food:{bg:'#E1F5EE',fg:'#085041'},Transport:{bg:'#E6F1FB',fg:'#0C447C'},Accommodation:{bg:'#EEEDFE',fg:'#3C3489'},Activities:{bg:'#FAEEDA',fg:'#633806'},Other:{bg:'#F1EFE8',fg:'#444441'}};
 const CAT_ICONS={Food:'ti-tools-kitchen-2',Transport:'ti-car',Accommodation:'ti-building',Activities:'ti-mountain',Other:'ti-dots'};
+const PAGE_TITLES={home:'Dashboard',expenses:'Expenses',add:'Add expense',settle:'Settlement',members:'Members',profile:'Profile'};
 
 let S={user:null,users:[],expenses:[],trip:'My Trip',otp:null,otpEmail:null};
 
@@ -347,25 +377,19 @@ function fmt(n){return '$'+Math.abs(n).toFixed(2);}
 function colorFor(id){const i=S.users.findIndex(u=>u.id===id);return COLORS[i%COLORS.length]||COLORS[0];}
 function initials(u){return((u.first||'?')[0]+(u.last||'?')[0]).toUpperCase();}
 
-function avEl(u,cls){
-  const c=colorFor(u.id);
-  const d=document.createElement('div');
-  d.className='av '+(cls||'');
-  d.style.background=c.bg;d.style.color=c.fg;
-  if(u.avatar){const img=document.createElement('img');img.src=u.avatar;img.alt=initials(u);d.appendChild(img);}
-  else d.textContent=initials(u);
-  return d;
-}
-
 function avHTML(u,cls){
   const c=colorFor(u.id);
-  if(u.avatar)return`<div class="av ${cls||''}" style="background:${c.bg};color:${c.fg};overflow:hidden;"><img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>`;
+  if(u.avatar)return`<div class="av ${cls||''}" style="overflow:hidden;"><img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>`;
   return`<div class="av ${cls||''}" style="background:${c.bg};color:${c.fg};">${initials(u)}</div>`;
 }
 
 function seedDemo(me){
   S.trip=me.tripName||'My Trip';
-  const others=[{id:uid(),first:'Sam',last:'Park',email:'sam@demo.com',avatar:null},{id:uid(),first:'Mia',last:'Torres',email:'mia@demo.com',avatar:null},{id:uid(),first:'Leo',last:'Chan',email:'leo@demo.com',avatar:null}];
+  const others=[
+    {id:uid(),first:'Sam',last:'Park',email:'sam@demo.com',avatar:null},
+    {id:uid(),first:'Mia',last:'Torres',email:'mia@demo.com',avatar:null},
+    {id:uid(),first:'Leo',last:'Chan',email:'leo@demo.com',avatar:null}
+  ];
   S.users=[me,...others];
   const [m,s,mi,l]=S.users.map(u=>u.id);
   S.expenses=[
@@ -379,38 +403,40 @@ function seedDemo(me){
   ];
 }
 
-function showLogin(){['loginForm'].forEach(id=>show(id));['otpForm','registerForm'].forEach(id=>hide(id));}
-function showOtp(){show('otpForm');hide('loginForm');hide('registerForm');}
-function showRegister(){show('registerForm');hide('loginForm');hide('otpForm');}
+function v(id){return document.getElementById(id).value.trim();}
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function hideErr(id){document.getElementById(id).classList.remove('show');}
+
+function showLogin(){show('loginForm');hide('otpForm');hide('registerForm');}
+function showRegister(){hide('loginForm');hide('otpForm');show('registerForm');}
 
 function sendOtp(){
-  const email=document.getElementById('loginEmail').value.trim();
+  const email=v('loginEmail');
   if(!email||!email.includes('@'))return;
   const u=S.users.find(x=>x.email===email);
   if(!u){alert('No account found. Please register.');return;}
   S.otp=String(Math.floor(100000+Math.random()*900000));S.otpEmail=email;
   document.getElementById('otpEmailLabel').textContent=email;
   document.getElementById('otpCodeHint').textContent='Demo code: '+S.otp;
-  hide('otpErr');showOtp();
+  hideErr('otpErr');
+  hide('loginForm');show('otpForm');
 }
 
 function verifyOtp(){
   if(document.getElementById('otpInput').value.trim()===S.otp){
     launch(S.users.find(u=>u.email===S.otpEmail));
-  }else{show('otpErr');}
+  }else{showErr('otpErr','Invalid code — try again.');}
 }
 
 function registerUser(){
   const f=v('regFirst'),l=v('regLast'),e=v('regEmail'),t=v('regTrip');
-  if(!f||!l||!e||!t){alert('Fill in all fields.');return;}
+  if(!f||!l||!e||!t){alert('Please fill in all fields.');return;}
   if(S.users.find(u=>u.email===e)){alert('Email already registered.');return;}
   const newU={id:uid(),first:f,last:l,email:e,avatar:null,tripName:t};
   seedDemo(newU);launch(newU);
 }
-
-function v(id){return document.getElementById(id).value.trim();}
 
 function launch(u){
   S.user=u;
@@ -419,27 +445,32 @@ function launch(u){
 }
 
 function logout(){
-  S.user=null;hide('mainApp');show('authScreen');showLogin();
+  S.user=null;
+  hide('mainApp');show('authScreen');showLogin();
 }
 
 function refreshTopbar(){
   const u=S.user;
   document.getElementById('topbarTrip').textContent=S.trip;
-  const av=document.getElementById('topbarAvatar');
+  const av=document.getElementById('topbarAv');
   const c=colorFor(u.id);
-  av.style.background=c.bg;av.style.color=c.fg;
-  if(u.avatar){av.innerHTML=`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;" alt="${initials(u)}" />`;}
-  else av.textContent=initials(u);
+  if(u.avatar){
+    av.innerHTML=`<img src="${u.avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`;
+    av.style.background='none';
+  }else{
+    av.textContent=initials(u);
+    av.style.background=c.bg;av.style.color=c.fg;av.style.fontWeight='700';av.style.fontSize='13px';
+  }
 }
 
 function navTo(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  show('page-'+name);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
   const nb=document.getElementById('nb-'+name);
   if(nb)nb.classList.add('active');
-  const titles={home:'Dashboard',expenses:'Expenses',add:'Add expense',settle:'Settlement',members:'Members',profile:'Profile'};
-  document.getElementById('topbarTitle').textContent=titles[name]||'SplitTrip';
+  document.getElementById('topbarTitle').textContent=PAGE_TITLES[name]||'SplitTrip';
+  document.getElementById('scrollArea').scrollTop=0;
   if(name==='home')renderHome();
   if(name==='expenses')renderExpenses('all');
   if(name==='add')renderAddForm();
@@ -448,16 +479,13 @@ function navTo(name){
   if(name==='profile')renderProfile();
 }
 
-function goProfile(){navTo('profile');}
-
 function getBalances(){
   const b={};S.users.forEach(u=>b[u.id]=0);
   S.expenses.forEach(e=>{
     const pp=e.amount/e.paidFor.length;
-    e.paidFor.forEach(uid=>{if(uid!==e.paidBy){b[e.paidBy]+=pp;b[uid]-=pp;}});
+    e.paidFor.forEach(id=>{if(id!==e.paidBy){b[e.paidBy]+=pp;b[id]-=pp;}});
   });return b;
 }
-
 function getTotals(){
   const t={};S.users.forEach(u=>t[u.id]=0);
   S.expenses.forEach(e=>t[e.paidBy]+=e.amount);return t;
@@ -470,15 +498,15 @@ function renderHome(){
   document.getElementById('metricGrid').innerHTML=`
     <div class="metric"><div class="metric-label">Total spent</div><div class="metric-val">${fmt(total)}</div></div>
     <div class="metric"><div class="metric-label">You paid</div><div class="metric-val">${fmt(myPaid)}</div></div>
-    <div class="metric"><div class="metric-label">Your balance</div><div class="metric-val ${myBal>=0?'positive':'negative'}">${myBal>=0?'+':'−'}${fmt(myBal)}</div></div>
+    <div class="metric"><div class="metric-label">Your balance</div><div class="metric-val ${myBal>=0?'green':'red'}">${myBal>=0?'+':'−'}${fmt(myBal)}</div></div>
     <div class="metric"><div class="metric-label">Expenses</div><div class="metric-val">${S.expenses.length}</div></div>`;
   const maxP=Math.max(...Object.values(tots),1);
   document.getElementById('spendBars').innerHTML=S.users.map(u=>{
     const c=colorFor(u.id);const pct=((tots[u.id]||0)/maxP*100).toFixed(1);
-    return`<div class="bar-row">${avHTML(u,'av-sm')}<div class="bar-name">${u.first}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.bg};border:1px solid ${c.fg}30;"></div></div><div class="bar-val">${fmt(tots[u.id]||0)}</div></div>`;
+    return`<div class="bar-row">${avHTML(u,'bar-av')}<div class="bar-name">${u.first}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.bg};border:1px solid ${c.fg}30;"></div></div><div class="bar-val">${fmt(tots[u.id]||0)}</div></div>`;
   }).join('');
   const recent=[...S.expenses].reverse().slice(0,5);
-  document.getElementById('recentList').innerHTML=recent.length?recent.map(e=>expRowHTML(e)).join(''):`<div style="padding:14px 16px;font-size:14px;color:var(--color-text-secondary);">No expenses yet.</div>`;
+  document.getElementById('recentList').innerHTML=recent.length?recent.map(e=>expRowHTML(e)).join(''):`<div style="padding:16px;font-size:14px;color:var(--text2);">No expenses yet.</div>`;
 }
 
 function expRowHTML(e){
@@ -486,16 +514,16 @@ function expRowHTML(e){
   const cc=CAT_COLORS[e.category]||CAT_COLORS.Other;
   const ci=CAT_ICONS[e.category]||'ti-dots';
   return`<div class="exp-row">
-    <div class="exp-icon" style="background:${cc.bg};color:${cc.fg};"><i class="ti ${ci}" aria-hidden="true"></i></div>
-    <div class="exp-body"><div class="exp-desc">${e.desc}</div><div class="exp-meta">${e.date} · ${payer?payer.first:'?'} · ${e.paidFor.length}p</div></div>
+    <div class="exp-icon" style="background:${cc.bg};color:${cc.fg};"><i class="ti ${ci}"></i></div>
+    <div class="exp-body"><div class="exp-desc">${e.desc}</div><div class="exp-meta">${e.date} · ${payer?payer.first:'?'} · ${e.paidFor.length} people</div></div>
     <div class="exp-amt">${fmt(e.amount)}</div>
-    <button class="del-btn" onclick="delExp('${e.id}')" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    <button class="del-btn" onclick="delExp('${e.id}')" aria-label="Delete"><i class="ti ti-trash"></i></button>
   </div>`;
 }
 
 function renderExpenses(cat){
   const list=cat==='all'?S.expenses:S.expenses.filter(e=>e.category===cat);
-  document.getElementById('expList').innerHTML=[...list].reverse().map(e=>expRowHTML(e)).join('')||`<div style="padding:14px 16px;font-size:14px;color:var(--color-text-secondary);">No expenses here.</div>`;
+  document.getElementById('expList').innerHTML=[...list].reverse().map(e=>expRowHTML(e)).join('')||`<div style="padding:16px;font-size:14px;color:var(--text2);">No expenses here.</div>`;
 }
 
 function filterExp(cat,el){
@@ -503,7 +531,12 @@ function filterExp(cat,el){
   el.classList.add('on');renderExpenses(cat);
 }
 
-function delExp(id){S.expenses=S.expenses.filter(e=>e.id!==id);renderExpenses('all');}
+function delExp(id){
+  S.expenses=S.expenses.filter(e=>e.id!==id);
+  renderExpenses('all');
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
+  document.querySelector('.fpill').classList.add('on');
+}
 
 function renderAddForm(){
   const pb=document.getElementById('expPaidBy');
@@ -512,12 +545,12 @@ function renderAddForm(){
   document.getElementById('expPaidFor').innerHTML=S.users.map(u=>`
     <label class="chip on" id="chip-${u.id}">
       <input type="checkbox" value="${u.id}" checked onchange="toggleChip('${u.id}',this)" />
-      ${avHTML(u,'av-sm')} ${u.first}
+      ${initials(u)} ${u.first}
     </label>`).join('');
   document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
   document.getElementById('expDesc').value='';
   document.getElementById('expAmt').value='';
-  hide('addErr');
+  hideErr('addErr');
 }
 
 function toggleChip(id,cb){document.getElementById('chip-'+id).classList.toggle('on',cb.checked);}
@@ -525,11 +558,10 @@ function toggleChip(id,cb){document.getElementById('chip-'+id).classList.toggle(
 function addExpense(){
   const desc=v('expDesc'),amt=parseFloat(document.getElementById('expAmt').value),cat=document.getElementById('expCat').value,date=document.getElementById('expDate').value,paidBy=document.getElementById('expPaidBy').value;
   const paidFor=Array.from(document.querySelectorAll('#expPaidFor input:checked')).map(c=>c.value);
-  const err=document.getElementById('addErr');
-  if(!desc){err.textContent='Enter a description.';show('addErr');return;}
-  if(!amt||amt<=0){err.textContent='Enter a valid amount.';show('addErr');return;}
-  if(!paidFor.length){err.textContent='Select who this was paid for.';show('addErr');return;}
-  hide('addErr');
+  if(!desc){showErr('addErr','Enter a description.');return;}
+  if(!amt||amt<=0){showErr('addErr','Enter a valid amount.');return;}
+  if(!paidFor.length){showErr('addErr','Select who this was paid for.');return;}
+  hideErr('addErr');
   S.expenses.push({id:uid(),desc,amount:amt,category:cat,date,paidBy,paidFor});
   navTo('expenses');
 }
@@ -555,52 +587,57 @@ function renderSettle(){
     <div class="metric"><div class="metric-label">Members</div><div class="metric-val">${S.users.length}</div></div>`;
   document.getElementById('balList').innerHTML=S.users.map(u=>{
     const b=bal[u.id]||0;
-    const cls=Math.abs(b)<0.01?'':b>0?'positive':'negative';
-    const label=Math.abs(b)<0.01?'Settled':b>0?`+${fmt(b)}`:`−${fmt(b)}`;
-    return`<div class="settle-row">${avHTML(u)}<div style="flex:1;font-size:14px;font-weight:500;">${u.first} ${u.last}</div><div class="settle-amt ${cls}">${label}</div></div>`;
+    const cls=Math.abs(b)<0.01?'':b>0?'green':'red';
+    const label=Math.abs(b)<0.01?'Settled up':b>0?`+${fmt(b)}`:`−${fmt(b)}`;
+    return`<div class="settle-row">${avHTML(u)}<div style="flex:1;font-size:15px;font-weight:600;">${u.first} ${u.last}</div><div class="settle-amt ${cls}">${label}</div></div>`;
   }).join('');
   const txns=computeSettlements();
   document.getElementById('settleList').innerHTML=txns.length?txns.map(t=>{
     const fr=S.users.find(u=>u.id===t.from),to=S.users.find(u=>u.id===t.to);
-    return`<div class="settle-row">${avHTML(fr)}<span style="font-size:14px;">${fr.first}</span><i class="ti ti-arrow-right" style="font-size:16px;color:var(--color-text-secondary);" aria-hidden="true"></i>${avHTML(to)}<span style="font-size:14px;">${to.first}</span><div class="settle-amt negative">${fmt(t.amt)}</div></div>`;
-  }).join(''):`<div style="padding:14px 16px;font-size:14px;color:var(--color-text-secondary);">Everyone is settled up!</div>`;
+    return`<div class="settle-row">${avHTML(fr)}<span style="font-size:14px;font-weight:600;">${fr.first}</span><i class="ti ti-arrow-right" style="font-size:18px;color:var(--text2);margin:0 4px;"></i>${avHTML(to)}<span style="font-size:14px;font-weight:600;">${to.first}</span><div class="settle-amt red">${fmt(t.amt)}</div></div>`;
+  }).join(''):`<div style="padding:16px;font-size:14px;color:var(--text2);">Everyone is settled up!</div>`;
 }
 
 function renderMembers(){
   const tots=getTotals();
   document.getElementById('memberList').innerHTML=S.users.map(u=>`
-    <div class="member-row">${avHTML(u)}<div class="member-info"><div class="member-name">${u.first} ${u.last}${u.id===S.user.id?' <span style="font-size:11px;color:var(--color-text-secondary);">(you)</span>':''}</div><div class="member-email">${u.email}</div></div><div style="font-size:12px;color:var(--color-text-secondary);flex-shrink:0;">${fmt(tots[u.id]||0)}</div></div>`).join('');
-  hide('inviteMsg');document.getElementById('inviteEmail').value='';
+    <div class="member-row">${avHTML(u)}<div class="member-info"><div class="member-name">${u.first} ${u.last}${u.id===S.user.id?' <span style="font-size:11px;color:var(--text2);font-weight:400;">(you)</span>':''}</div><div class="member-email">${u.email}</div></div><div style="font-size:13px;color:var(--text2);flex-shrink:0;">${fmt(tots[u.id]||0)}</div></div>`).join('');
+  const msg=document.getElementById('inviteMsg');
+  msg.classList.remove('show');
+  document.getElementById('inviteEmail').value='';
 }
 
 function inviteMember(){
   const email=v('inviteEmail');const msg=document.getElementById('inviteMsg');
-  if(!email||!email.includes('@')){msg.textContent='Enter a valid email.';msg.style.color='var(--color-text-danger)';show('inviteMsg');return;}
-  if(S.users.find(u=>u.email===email)){msg.textContent='Already a member.';msg.style.color='var(--color-text-danger)';show('inviteMsg');return;}
+  if(!email||!email.includes('@')){msg.textContent='Enter a valid email.';msg.style.color='var(--red)';msg.classList.add('show');return;}
+  if(S.users.find(u=>u.email===email)){msg.textContent='Already a member.';msg.style.color='var(--red)';msg.classList.add('show');return;}
   S.users.push({id:uid(),first:email.split('@')[0],last:'',email,avatar:null});
   document.getElementById('inviteEmail').value='';
-  msg.textContent='Invite sent! Member added.';msg.style.color='#1D9E75';show('inviteMsg');
-  renderMembers();show('inviteMsg');
+  msg.textContent='Invite sent! Member added.';msg.style.color='var(--green)';msg.classList.add('show');
+  renderMembers();msg.classList.add('show');
 }
 
 function renderProfile(){
-  const u=S.user;
-  const c=colorFor(u.id);
+  const u=S.user;const c=colorFor(u.id);
   const av=document.getElementById('profileAv');
-  av.style.background=c.bg;av.style.color=c.fg;
-  if(u.avatar){av.innerHTML=`<img src="${u.avatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;" alt="${initials(u)}" />`;}
-  else av.textContent=initials(u);
+  if(u.avatar){av.innerHTML=`<img src="${u.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;av.style.background='none';}
+  else{av.textContent=initials(u);av.style.background=c.bg;av.style.color=c.fg;}
   document.getElementById('profileName').textContent=u.first+' '+u.last;
   document.getElementById('profileEmailDisp').textContent=u.email;
   document.getElementById('pfFirst').value=u.first;
   document.getElementById('pfLast').value=u.last;
-  hide('saveMsg');
+  document.getElementById('saveMsg').classList.remove('show');
 }
 
 function uploadAvatar(ev){
   const file=ev.target.files[0];if(!file)return;
   const r=new FileReader();
-  r.onload=e=>{S.user.avatar=e.target.result;const idx=S.users.findIndex(u=>u.id===S.user.id);if(idx>=0)S.users[idx].avatar=e.target.result;renderProfile();refreshTopbar();};
+  r.onload=e=>{
+    S.user.avatar=e.target.result;
+    const idx=S.users.findIndex(u=>u.id===S.user.id);
+    if(idx>=0)S.users[idx].avatar=e.target.result;
+    renderProfile();refreshTopbar();
+  };
   r.readAsDataURL(file);
 }
 
@@ -610,8 +647,11 @@ function saveProfile(){
   const idx=S.users.findIndex(u=>u.id===S.user.id);
   if(idx>=0){S.users[idx].first=f;S.users[idx].last=l;}
   renderProfile();refreshTopbar();
-  show('saveMsg');setTimeout(()=>hide('saveMsg'),2000);
+  document.getElementById('saveMsg').classList.add('show');
+  setTimeout(()=>document.getElementById('saveMsg').classList.remove('show'),2500);
 }
 
 showLogin();
 </script>
+</body>
+</html>
