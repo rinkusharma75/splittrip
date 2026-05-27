@@ -176,9 +176,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="app">
   <div class="loading-screen" id="loadingScreen">
     <div class="spinner"></div>
-    <div style="margin-bottom:8px;"><svg class="logo-mark" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="var(--text)"/><path d="M28 83 L132 70 L142 79 L132 89 L28 83 Z" fill="var(--bg)"/><path d="M70 83 L48 116 L96 98 Z" fill="var(--bg)"/><path d="M100 81 L92 100 L118 89 Z" fill="var(--bg)"/><ellipse cx="143" cy="80" rx="9" ry="7" fill="var(--bg)"/></svg></div>
-    <div class="loading-text" style="font-size:17px;font-weight:700;letter-spacing:-.3px;">SplitTrip</div>
-    <div class="loading-text" style="font-size:12px;margin-top:4px;">Travel. Split. Settle.</div>
+    <div class="loading-text" id="loadingStatus">Starting…</div>
   </div>
 </div>
 
@@ -226,22 +224,35 @@ function setLoading(btnId,loading){
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────────
+function setStatus(msg){const el=document.getElementById('loadingStatus');if(el)el.textContent=msg;}
+
 async function init(){
+  setStatus('Step 1: checking supabase…');
+  if(!window.supabase&&!window.Supabase){
+    setStatus('ERROR: Supabase library failed to load. Check network.');
+    return;
+  }
+  setStatus('Step 2: getting session…');
   try {
-    // Try to get session directly first
-    const {data:{session},error} = await sb.auth.getSession();
+    const {data,error} = await sb.auth.getSession();
+    if(error){setStatus('Session error: '+error.message);renderAuth();return;}
+    const session=data&&data.session;
+    setStatus('Step 3: session='+(session?'found':'none'));
     if(session){
       STATE.session=session;
+      setStatus('Step 4: loading user data…');
       await loadUserData();
+      setStatus('Step 5: rendering app…');
       renderApp();
     } else {
+      setStatus('No session — showing auth');
       renderAuth();
     }
   } catch(e){
-    renderAuth();
+    setStatus('ERROR: '+e.message);
+    setTimeout(renderAuth, 2000);
   }
 
-  // Also listen for changes (handles magic link redirect)
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session&&!STATE.session){
       STATE.session=session;
@@ -813,7 +824,7 @@ async function inviteMember(){
     if(inviteBtn)inviteBtn.disabled=false;
     if(error){msg.textContent='Failed to send invite: '+error.message;msg.style.color='var(--red)';msg.classList.add('show');return;}
     document.getElementById('inviteEmail').value='';
-    msg.textContent='Invite sent to '+email+'! They'll join when they sign up.';
+    msg.textContent='Invite sent to '+email+'! They will join when they sign up.';
     msg.style.color='var(--green)';msg.classList.add('show');
   }
   if(inviteBtn)inviteBtn.disabled=false;
