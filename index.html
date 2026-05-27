@@ -283,13 +283,22 @@ async function loadUserData(){
 async function loadTripData(){
   if(!STATE.trip)return;
   const tid=STATE.trip.id;
-  // Load members
-  const {data:members}=await sb.from('trip_members').select('user_id').eq('trip_id',tid);
-  const uids=members.map(m=>m.user_id);
-  const {data:profiles}=await sb.from('profiles').select('*').in('id',uids);
-  STATE.members=profiles||[];
-  const pm={};(profiles||[]).forEach(p=>pm[p.id]=p);
-  STATE.profiles=pm;
+  // Load members — join profiles directly to avoid RLS issues
+  const {data:members,error:mErr}=await sb.from('trip_members')
+    .select('user_id, profiles(*)')
+    .eq('trip_id',tid);
+  if(!mErr&&members&&members.length){
+    const profiles=members.map(m=>m.profiles).filter(Boolean);
+    STATE.members=profiles;
+    const pm={};profiles.forEach(p=>pm[p.id]=p);
+    STATE.profiles=pm;
+  } else {
+    // Fallback: load just current user as member
+    if(STATE.profile&&!STATE.members.find(m=>m.id===STATE.profile.id)){
+      STATE.members=[STATE.profile];
+      STATE.profiles[STATE.profile.id]=STATE.profile;
+    }
+  }
   // Load expenses
   const {data:expenses}=await sb.from('expenses').select('*').eq('trip_id',tid).order('date',{ascending:false});
   STATE.expenses=expenses||[];
