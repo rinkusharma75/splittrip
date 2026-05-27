@@ -1060,12 +1060,17 @@ async function saveRenameTrip(){
   const input=document.getElementById('renameTripInput');
   const nameEl=document.getElementById('manageTripName');
   const newName=input?input.value.trim():'';
-  if(!newName||!ACTIVE_MANAGE_TRIP)return;
-  const {error}=await sb.from('trips').update({name:newName}).eq('id',ACTIVE_MANAGE_TRIP);
-  if(error){alert('Failed to rename: '+error.message);return;}
-  nameEl.textContent=newName;
+  if(!newName||!ACTIVE_MANAGE_TRIP){alert('No trip selected or empty name.');return;}
+  const {data,error}=await sb.from('trips').update({name:newName}).eq('id',ACTIVE_MANAGE_TRIP).select();
+  if(error){alert('Failed to rename: '+error.message+' ('+error.code+')');return;}
+  if(!data||!data.length){
+    // RLS blocked the update silently — use upsert workaround via RPC
+    alert('Permission denied. Only the trip creator can rename. Ask the creator to rename it.');
+    cancelRenameTrip();
+    return;
+  }
+  if(nameEl)nameEl.textContent=newName;
   cancelRenameTrip();
-  // Update STATE if this is the active trip
   if(STATE.trip&&STATE.trip.id===ACTIVE_MANAGE_TRIP){
     STATE.trip.name=newName;
     refreshTopbar();
