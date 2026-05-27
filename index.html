@@ -1033,7 +1033,7 @@ function searchMembers(query){
     const c=colorFor(p.id);
     const av=p.avatar_url?`<img src="${p.avatar_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />`:'';
     const avStyle3=p.avatar_url?'overflow:hidden;':'background:'+c.bg+';color:'+c.fg+';';
-    return'<div class="search-result-row" onclick="addMemberFromSearch(''+p.id+'')">'+
+    return'<div class="search-result-row" data-uid="'+p.id+'" onclick="addMemberFromSearch(this.dataset.uid)">'+
       '<div class="av av-sm" style="'+avStyle3+'">'+(p.avatar_url?av:initials(p))+'</div>'+
       '<div style="flex:1;min-width:0;">'+
         '<div style="font-size:14px;font-weight:600;">'+p.first+' '+p.last+'</div>'+
