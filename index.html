@@ -691,9 +691,14 @@ function renderExpenses(cat){
 function filterExp(cat,el){renderExpenses(cat);}
 
 async function delExp(id){
-  await sb.from('expenses').delete().eq('id',id);
+  const {error}=await sb.from('expenses').delete().eq('id',id);
+  if(error){alert('Could not delete: '+error.message);return;}
   STATE.expenses=STATE.expenses.filter(e=>e.id!==id);
-  renderExpenses('all');
+  // Re-render whichever page is currently active
+  const homePage=document.getElementById('page-home');
+  const expPage=document.getElementById('page-expenses');
+  if(homePage&&homePage.classList.contains('active'))renderHome();
+  else renderExpenses('all');
 }
 
 // ── ADD EXPENSE ────────────────────────────────────────────────────────────
